@@ -78,3 +78,26 @@ Rules:
 - Budget should be a single number representing max acceptable hourly rate.
 - Only include what was explicitly stated or clearly implied.
 - Use null for unknown fields, [] for empty arrays.`
+
+
+/**
+ * Lightweight prompt for real-time analysis of the user's description
+ * as they type on the landing page. Used with Haiku for speed/cost.
+ */
+export const ANALYZE_DESCRIPTION_PROMPT = `Extract what information is present in this text. Return ONLY a valid JSON object, no markdown, no explanation:
+{
+  "location": "city name or null",
+  "budget": "extracted budget string or null",
+  "timeline": "when they need help or null",
+  "scope": "what they need help with or null",
+  "style": "style preferences or null"
+}
+Rules:
+- Use null for anything not mentioned or unclear.
+- Preserve the user's language (Czech values stay in Czech, English in English).
+- Keep extracted values short (1-5 words each).
+- For location, look for Czech cities (Praha/Prague, Brno, Olomouc, Ostrava) in any grammatical form.
+- For budget, extract the amount with currency (e.g. "~1500 Kč/hr", "€60/hr").
+- For timeline, extract when they need help (e.g. "příští měsíc", "next week", "ASAP").
+- For scope, extract what kind of help (e.g. "layout", "renovation", "furniture arrangement").
+- For style, extract aesthetic preferences (e.g. "scandinavian", "modern", "minimalist").`

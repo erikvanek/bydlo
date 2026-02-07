@@ -1,5 +1,5 @@
 import type { ConversationMessage, ExtractedNeeds } from '@/types'
-import { EXTRACT_NEEDS_PROMPT } from './systemPrompt'
+import { EXTRACT_NEEDS_PROMPT, ANALYZE_DESCRIPTION_PROMPT } from './systemPrompt'
 
 export interface LLMRequest {
   conversationHistory: ConversationMessage[]
@@ -52,12 +52,63 @@ export async function extractNeeds(
   }
 }
 
+/**
+ * Real-time analysis of the user's description as they type.
+ * Uses Haiku for speed/cost. Returns null-filled object on any error.
+ */
+export interface DescriptionAnalysis {
+  location: string | null
+  budget: string | null
+  timeline: string | null
+  scope: string | null
+  style: string | null
+}
+
+const EMPTY_ANALYSIS: DescriptionAnalysis = {
+  location: null,
+  budget: null,
+  timeline: null,
+  scope: null,
+  style: null,
+}
+
+export async function analyzeDescription(
+  text: string,
+  signal?: AbortSignal
+): Promise<DescriptionAnalysis> {
+  try {
+    const raw = await callClaude(
+      ANALYZE_DESCRIPTION_PROMPT,
+      [{ role: 'user', content: text }],
+      150,
+      'claude-haiku-4-5-20251001',
+      signal
+    )
+
+    const jsonStr = raw.replace(/^```json?\n?/, '').replace(/\n?```$/, '').trim()
+    const parsed = JSON.parse(jsonStr)
+
+    return {
+      location: parsed.location ?? null,
+      budget: parsed.budget ?? null,
+      timeline: parsed.timeline ?? null,
+      scope: parsed.scope ?? null,
+      style: parsed.style ?? null,
+    }
+  } catch {
+    // Silently return empty on any error (network, parse, abort)
+    return EMPTY_ANALYSIS
+  }
+}
+
 // —— Real API implementation (via proxy) ——
 
 async function callClaude(
   systemPrompt: string,
   messages: { role: 'user' | 'assistant'; content: string }[],
-  maxTokens = 512
+  maxTokens = 512,
+  model?: string,
+  signal?: AbortSignal
 ): Promise<string> {
   const response = await fetch(`${API_URL}/api/chat`, {
     method: 'POST',
@@ -66,7 +117,9 @@ async function callClaude(
       system: systemPrompt,
       messages,
       max_tokens: maxTokens,
+      ...(model && { model }),
     }),
+    signal,
   })
 
   if (!response.ok) {

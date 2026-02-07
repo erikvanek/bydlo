@@ -52,6 +52,138 @@ Low-fidelity ASCII wireframes for each screen. Use with [requirements.md](../req
 
 ---
 
+## Landing — context completeness nudge
+
+The goal: reduce conversation back-and-forth by nudging users to provide richer
+initial descriptions. The right sidebar transforms from "How it works" (empty
+textarea) to a "Your situation" checklist (once they start typing).
+
+**Detection is LLM-based** — a lightweight Claude call (Haiku) extracts
+structured data from the user's free text. This handles Czech declension,
+diacritics, informal language, and mixed Czech/English reliably.
+Debounce: **500ms** after user stops typing.
+
+### State 1 — Empty (current behavior, "How it works" visible)
+
+```
+┌──────────────────────────────────────────────────────────────────────┐
+│                                                                      │
+│  Bydlo                                                               │
+│  Helping you live better — one room at a time.                       │
+│                                                                      │
+│  ┌──────────────────────────────────┬───────────────────────────┐   │
+│  │  LEFT (lg:col-span-8)            │ RIGHT (lg:col-span-4)     │   │
+│  │                                   │                           │   │
+│  │  Describe your living situation   │ [Card, muted]             │   │
+│  │  and we'll match you with a       │  HOW IT WORKS             │   │
+│  │  freelance designer who can help. │                           │   │
+│  │                                   │  ① Describe               │   │
+│  │  ┌───────────────────────────┐   │    your situation         │   │
+│  │  │ placeholder text…         │   │  ② Add                    │   │
+│  │  │                           │   │    more details            │   │
+│  │  │                      [→]  │   │  ③ Match                  │   │
+│  │  └───────────────────────────┘   │    with a designer        │   │
+│  │  0 / 500                         │  ④ Book                   │   │
+│  │                                   │    a consultation         │   │
+│  │  TYPICAL SCENARIOS                │                           │   │
+│  │  [Moving in with partner]         │                           │   │
+│  │  [Shared flat refresh]            │                           │   │
+│  │  [Small kitchen reno]             │                           │   │
+│  └──────────────────────────────────┴───────────────────────────┘   │
+│                                                                      │
+│  ... featured consultants below ...                                  │
+└──────────────────────────────────────────────────────────────────────┘
+```
+
+### State 2 — Typing (sidebar crossfades to checklist)
+
+The sidebar card content crossfades (opacity transition, ~200ms) from
+"How it works" to "Your situation" checklist. Same card container —
+no layout shift. Triggers when the LLM analysis returns at least one
+detected field.
+
+```
+┌──────────────────────────────────────────────────────────────────────┐
+│                                                                      │
+│  Bydlo                                                               │
+│  Helping you live better — one room at a time.                       │
+│                                                                      │
+│  ┌──────────────────────────────────┬───────────────────────────┐   │
+│  │  LEFT (lg:col-span-8)            │ RIGHT (lg:col-span-4)     │   │
+│  │                                   │                           │   │
+│  │  Describe your living situation   │ [Card, subtle border]     │   │
+│  │                                   │  YOUR SITUATION           │   │
+│  │  ┌───────────────────────────┐   │                           │   │
+│  │  │ S partnerem se stěhujeme │   │  ✓ Location               │   │
+│  │  │ do bytu 2+kk v Praze     │   │    Praha                  │   │
+│  │  │ příští měsíc. Máme rozpočet│   │                           │   │
+│  │  │ asi 1500 Kč/h a potřebujeme│   │  ✓ Budget                │   │
+│  │  │ pomoct sladit nábytek     │   │    ~1500 Kč/hr            │   │
+│  │  │ a zařídit obývák…    [→]  │   │                           │   │
+│  │  └───────────────────────────┘   │  ✓ Timeline               │   │
+│  │  187 / 500 · ready to go         │    příští měsíc            │   │
+│  │                                   │                           │   │
+│  │                                   │  ○ What you need          │   │
+│  │                                   │    layout? renovation?    │   │
+│  │                                   │                           │   │
+│  │                                   │  ○ Style preference       │   │
+│  │                                   │    optional               │   │
+│  │                                   │                           │   │
+│  │                                   │  ─────────────────        │   │
+│  │                                   │  3 of 5 — good start     │   │
+│  └──────────────────────────────────┴───────────────────────────┘   │
+│                                                                      │
+└──────────────────────────────────────────────────────────────────────┘
+```
+
+### Detection: LLM-based extraction
+
+Uses a lightweight Claude call (Haiku model via the existing /api/chat proxy)
+to extract structured data from the textarea text. Handles Czech + English.
+
+**System prompt** (new, ~150 tokens):
+```
+Extract what you can from this user description. Return ONLY a JSON object:
+{
+  "location": "city name or null",
+  "budget": "extracted budget string or null",
+  "timeline": "when they need help or null",
+  "scope": "what they need help with or null",
+  "style": "style preferences or null"
+}
+Respond with valid JSON only. Use null for anything not mentioned.
+Preserve the user's language (Czech values stay Czech).
+```
+
+**API call details:**
+- Model: `claude-haiku-4-20250414` (fast, cheap — ~$0.0002 per call)
+- max_tokens: 150
+- Debounce: 500ms after last keystroke
+- Only fires when textarea.length >= 20 (MIN_LENGTH)
+- Abort previous in-flight request when new one fires (AbortController)
+- On error/timeout: silently keep previous state (non-blocking)
+
+**Cost estimate:** ~5-10 calls per user session = ~$0.001-0.002 total.
+
+### Behavior notes
+
+- **Transition trigger:** LLM analysis returns at least 1 non-null field.
+  Card content crossfades (opacity 0→1, ~200ms). No layout shift.
+  When textarea is emptied → revert to "How it works".
+- **Checked items (✓):** Green checkmark + extracted value in muted text.
+- **Unchecked items (○):** Grey circle + hint text ("layout? renovation?").
+  Not required — just helpful nudges.
+- **Progress line:** "3 of 5" with a subtle label: "good start" / "almost
+  there" / "looking good". NOT a blocker — submit enabled at 20 chars always.
+- **Mobile (<lg):** Checklist moves below the textarea (stacked), shown as
+  a compact horizontal pill row or collapsed section.
+- **Quick scenario buttons:** Fill the textarea and trigger the same debounced
+  analysis, so the checklist updates after 500ms.
+- **Worker change:** Accept optional `model` param in /api/chat body so the
+  frontend can request Haiku for cheap analysis calls.
+
+---
+
 ## Describe situation
 
 ```

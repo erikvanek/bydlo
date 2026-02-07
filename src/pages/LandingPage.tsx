@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { ArrowRight } from 'lucide-react'
 import { useConversation } from '@/context/ConversationContext'
@@ -7,6 +7,8 @@ import { DesignerCard } from '@/components/DesignerCard'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
+import { analyzeDescription } from '@/services/llmService'
+import type { DescriptionAnalysis } from '@/services/llmService'
 
 const MIN_LENGTH = 20
 
@@ -32,15 +34,77 @@ const WORKFLOW_STEPS = [
   { title: 'Book', description: 'a consultation' },
 ]
 
+const CHECKLIST_ITEMS: {
+  key: keyof DescriptionAnalysis
+  label: string
+  hint: string
+}[] = [
+  { key: 'location', label: 'Location', hint: 'which city?' },
+  { key: 'budget', label: 'Budget', hint: 'rough budget?' },
+  { key: 'timeline', label: 'Timeline', hint: 'when do you need help?' },
+  { key: 'scope', label: 'What you need', hint: 'layout? renovation?' },
+  { key: 'style', label: 'Style preference', hint: 'optional' },
+]
+
+function progressLabel(count: number, total: number): string {
+  if (count === total) return 'all set!'
+  if (count <= 2) return 'good start'
+  return 'almost there'
+}
+
 const FEATURED_IDS = ['1', '3', '7', '13']
 const featuredDesigners = designers.filter((d) => FEATURED_IDS.includes(d.id))
 
 export function LandingPage() {
   const [situationText, setSituationText] = useState('')
+  const [analysis, setAnalysis] = useState<DescriptionAnalysis | null>(null)
+  const abortRef = useRef<AbortController | null>(null)
   const navigate = useNavigate()
   const { setInitialDescription } = useConversation()
 
   const isValid = situationText.trim().length >= MIN_LENGTH
+  // Track the latest text for the interval to read
+  const textRef = useRef(situationText)
+  textRef.current = situationText
+  // Track what text we last sent to avoid duplicate calls
+  const lastSentRef = useRef('')
+
+  // Periodic LLM analysis — fires every 500ms while text is long enough
+  useEffect(() => {
+    if (situationText.trim().length < MIN_LENGTH) {
+      setAnalysis(null)
+      lastSentRef.current = ''
+      return
+    }
+
+    // Fire immediately on first valid text, then every 500ms
+    const doAnalysis = async () => {
+      const current = textRef.current.trim()
+      if (current.length < MIN_LENGTH || current === lastSentRef.current) return
+
+      lastSentRef.current = current
+      abortRef.current?.abort()
+      const controller = new AbortController()
+      abortRef.current = controller
+
+      try {
+        const result = await analyzeDescription(current, controller.signal)
+        if (!controller.signal.aborted) {
+          setAnalysis(result)
+        }
+      } catch {
+        // Silently ignore — keep previous state
+      }
+    }
+
+    doAnalysis() // fire immediately
+    const interval = setInterval(doAnalysis, 500)
+
+    return () => {
+      clearInterval(interval)
+      abortRef.current?.abort()
+    }
+  }, [situationText.trim().length >= MIN_LENGTH ? 'active' : 'inactive']) // only re-mount when crossing the threshold
 
   const handleSubmit = () => {
     if (!isValid) return
@@ -54,6 +118,13 @@ export function LandingPage() {
       handleSubmit()
     }
   }
+
+  // Count how many fields the analysis detected
+  const detectedCount = analysis
+    ? CHECKLIST_ITEMS.filter((item) => analysis[item.key] !== null).length
+    : 0
+  const showChecklist = analysis !== null && detectedCount > 0
+  const allComplete = detectedCount === CHECKLIST_ITEMS.length
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -135,26 +206,117 @@ export function LandingPage() {
             </div>
           </div>
 
-          {/* Right column: How it works — compact, muted */}
+          {/* Right column: How it works / Your situation checklist */}
           <div className="lg:col-span-4 lg:pt-8">
-            <Card className="border-slate-100 shadow-none bg-slate-50/50">
+            <Card className={`relative overflow-hidden transition-all duration-500 ${
+              allComplete
+                ? 'border-emerald-200 bg-emerald-50/30 shadow-sm shadow-emerald-100'
+                : 'border-slate-100 shadow-none bg-slate-50/50'
+            }`}>
               <CardContent className="p-5">
-                <p className="text-xs font-medium uppercase tracking-wider text-slate-400 mb-3">
-                  How it works
-                </p>
-                <ol className="space-y-2.5">
-                  {WORKFLOW_STEPS.map((step, i) => (
-                    <li key={i} className="flex items-start gap-2.5">
-                      <span className="flex items-center justify-center h-5 w-5 rounded-full border border-slate-300 text-[11px] font-semibold text-slate-400 shrink-0 mt-0.5">
-                        {i + 1}
-                      </span>
-                      <p className="text-sm text-slate-500">
-                        <span className="font-medium text-slate-700">{step.title}</span>{' '}
-                        {step.description}
+
+                {/* "How it works" — fades out when checklist appears */}
+                <div
+                  className="transition-opacity duration-200"
+                  style={{
+                    opacity: showChecklist ? 0 : 1,
+                    position: showChecklist ? 'absolute' : 'relative',
+                    inset: showChecklist ? 0 : undefined,
+                    padding: showChecklist ? '1.25rem' : undefined,
+                    pointerEvents: showChecklist ? 'none' : undefined,
+                  }}
+                >
+                  <p className="text-xs font-medium uppercase tracking-wider text-slate-400 mb-3">
+                    How it works
+                  </p>
+                  <ol className="space-y-2.5">
+                    {WORKFLOW_STEPS.map((step, i) => (
+                      <li key={i} className="flex items-start gap-2.5">
+                        <span className="flex items-center justify-center h-5 w-5 rounded-full border border-slate-300 text-[11px] font-semibold text-slate-400 shrink-0 mt-0.5">
+                          {i + 1}
+                        </span>
+                        <p className="text-sm text-slate-500">
+                          <span className="font-medium text-slate-700">{step.title}</span>{' '}
+                          {step.description}
+                        </p>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+
+                {/* "Your situation" checklist — fades in */}
+                <div
+                  className="transition-opacity duration-200"
+                  style={{
+                    opacity: showChecklist ? 1 : 0,
+                    position: showChecklist ? 'relative' : 'absolute',
+                    inset: showChecklist ? undefined : 0,
+                    padding: showChecklist ? undefined : '1.25rem',
+                    pointerEvents: showChecklist ? undefined : 'none',
+                  }}
+                >
+                  <p className={`text-xs font-medium uppercase tracking-wider mb-3 transition-colors duration-300 ${
+                    allComplete ? 'text-emerald-500' : 'text-slate-400'
+                  }`}>
+                    Your situation
+                  </p>
+                  <ul className="space-y-3">
+                    {CHECKLIST_ITEMS.map((item) => {
+                      const value = analysis?.[item.key] ?? null
+                      const detected = value !== null
+
+                      return (
+                        <li key={item.key} className="flex items-start gap-2.5">
+                          <span
+                            className={`flex items-center justify-center h-5 w-5 rounded-full shrink-0 mt-0.5 text-[11px] font-semibold ${
+                              detected
+                                ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
+                                : 'border border-slate-200 text-slate-300'
+                            }`}
+                          >
+                            {detected ? '\u2713' : '\u25CB'}
+                          </span>
+                          <div className="min-w-0">
+                            <p
+                              className={`text-sm ${
+                                detected
+                                  ? 'font-medium text-slate-700'
+                                  : 'text-slate-400'
+                              }`}
+                            >
+                              {item.label}
+                            </p>
+                            <p className="text-xs text-slate-400 truncate">
+                              {detected ? value : item.hint}
+                            </p>
+                          </div>
+                        </li>
+                      )
+                    })}
+                  </ul>
+
+                  {/* Progress summary */}
+                  <div className={`mt-4 pt-3 border-t transition-colors duration-300 ${
+                    allComplete ? 'border-emerald-100' : 'border-slate-100'
+                  }`}>
+                    {allComplete ? (
+                      <div className="flex items-center gap-2 animate-in fade-in slide-in-from-bottom-1 duration-300">
+                        <span className="flex items-center justify-center h-5 w-5 rounded-full bg-emerald-100 text-emerald-600 text-xs">
+                          ✓
+                        </span>
+                        <p className="text-sm font-medium text-emerald-700">
+                          Great description — you're all set!
+                        </p>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-slate-400">
+                        {detectedCount} of {CHECKLIST_ITEMS.length} &mdash;{' '}
+                        {progressLabel(detectedCount, CHECKLIST_ITEMS.length)}
                       </p>
-                    </li>
-                  ))}
-                </ol>
+                    )}
+                  </div>
+                </div>
+
               </CardContent>
             </Card>
           </div>

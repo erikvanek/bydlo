@@ -58,7 +58,7 @@ export default {
 
     try {
       const body = await request.json()
-      const { system, messages, max_tokens } = body
+      const { system, messages, max_tokens, model } = body
 
       if (!messages || !Array.isArray(messages)) {
         return new Response(JSON.stringify({ error: 'messages array is required' }), {
@@ -76,7 +76,7 @@ export default {
           'anthropic-version': '2023-06-01',
         },
         body: JSON.stringify({
-          model: ANTHROPIC_MODEL,
+          model: model || ANTHROPIC_MODEL,
           max_tokens: max_tokens || 512,
           system: system || '',
           messages,

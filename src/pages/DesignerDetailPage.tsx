@@ -29,7 +29,6 @@ export function DesignerDetailPage() {
       <main className="max-w-2xl mx-auto px-4 py-8">
         <DesignerProfile
           designer={designer}
-          onBookConsultation={() => {}}
           onBack={() => navigate(-1)}
         />
       </main>

@@ -123,8 +123,7 @@ export function ConversationPage() {
           <CardHeader className="shrink-0">
             <h1 className="text-xl font-bold">A few questions</h1>
             <p className="text-sm text-slate-600">
-              Your situation: {state.initialDescription.slice(0, 80)}
-              {state.initialDescription.length > 80 ? '…' : ''}
+              Your situation: {state.initialDescription}
             </p>
           </CardHeader>
           <CardContent className="flex-1 flex flex-col min-h-0 p-0">

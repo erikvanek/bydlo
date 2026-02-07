@@ -27,7 +27,7 @@ const QUICK_EXAMPLES = [
 
 const WORKFLOW_STEPS = [
   { title: 'Describe', description: 'your situation' },
-  { title: 'Chat', description: 'with our AI' },
+  { title: 'Add', description: 'more details' },
   { title: 'Match', description: 'with a designer' },
   { title: 'Book', description: 'a consultation' },
 ]

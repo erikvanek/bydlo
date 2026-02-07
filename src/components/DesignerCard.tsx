@@ -1,0 +1,50 @@
+import { Card, CardContent, CardFooter } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
+import type { Designer } from '@/types'
+
+interface DesignerCardProps {
+  designer: Designer
+  showMatchScore?: boolean
+  onViewProfile: () => void
+}
+
+const specialtyLabel: Record<Designer['specialty'], string> = {
+  interior: 'Interior Design',
+  architect: 'Architecture',
+  both: 'Interior & Architecture',
+}
+
+export function DesignerCard({ designer, showMatchScore = false, onViewProfile }: DesignerCardProps) {
+  return (
+    <Card className="overflow-hidden hover:shadow-md transition-shadow">
+      <CardContent className="p-0">
+        <div className="flex gap-4 p-4">
+          <Avatar className="h-16 w-16 shrink-0">
+            <AvatarImage src={designer.photo} alt={designer.name} />
+            <AvatarFallback>{designer.name.slice(0, 2)}</AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between gap-2">
+              <h3 className="font-semibold text-slate-900">{designer.name}</h3>
+              {showMatchScore && designer.matchScore != null && (
+                <Badge variant="secondary">{designer.matchScore}% match</Badge>
+              )}
+            </div>
+            <Badge variant="outline" className="mt-1">{specialtyLabel[designer.specialty]}</Badge>
+            <p className="text-sm text-slate-500 mt-1">
+              {designer.location} · €{designer.hourlyRate}/hr · {designer.availability.replace(/-/g, ' ')}
+            </p>
+            <p className="text-sm text-slate-600 mt-2 line-clamp-2">{designer.shortBio}</p>
+          </div>
+        </div>
+      </CardContent>
+      <CardFooter className="pt-0 pb-4 px-4">
+        <Button variant="outline" className="w-full" onClick={onViewProfile}>
+          View profile
+        </Button>
+      </CardFooter>
+    </Card>
+  )
+}

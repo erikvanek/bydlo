@@ -12,43 +12,28 @@ export interface LLMResponse {
   shouldContinue: boolean
 }
 
-const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages'
-const ANTHROPIC_MODEL = 'claude-sonnet-4-20250514'
-
-// —— Runtime API key fetching (never bundled) ——
-
-/** undefined = not yet fetched, null = no key available, string = key */
-let _cachedApiKey: string | null | undefined = undefined
-
-async function getApiKey(): Promise<string | null> {
-  if (_cachedApiKey !== undefined) return _cachedApiKey
-  try {
-    const res = await fetch('/api/config')
-    if (!res.ok) {
-      _cachedApiKey = null
-      return null
-    }
-    const data = await res.json()
-    _cachedApiKey = data.apiKey || null
-  } catch {
-    _cachedApiKey = null
-  }
-  return _cachedApiKey
-}
-
-async function shouldUseMock(): Promise<boolean> {
-  const key = await getApiKey()
-  return !key
-}
+/**
+ * API base URL:
+ * - Dev: empty string → relative URL → Vite dev proxy handles /api/chat
+ * - Prod: set via VITE_API_URL in .env.production → Cloudflare Worker URL
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const API_URL: string = (import.meta as any).env?.VITE_API_URL || ''
 
 /**
  * Generate next follow-up question based on conversation so far.
+ * Tries real API first, falls back to mock on failure.
  */
 export async function generateFollowUp(request: LLMRequest): Promise<LLMResponse> {
-  if (await shouldUseMock()) {
-    return mockGenerateFollowUp(request)
+  try {
+    return await realLLMCall(request)
+  } catch (e) {
+    // If it's a network error (no proxy), fall back to mock
+    if (e instanceof TypeError && e.message.includes('fetch')) {
+      return mockGenerateFollowUp(request)
+    }
+    throw e
   }
-  return realLLMCall(request)
 }
 
 /**
@@ -57,44 +42,39 @@ export async function generateFollowUp(request: LLMRequest): Promise<LLMResponse
 export async function extractNeeds(
   conversationHistory: ConversationMessage[]
 ): Promise<ExtractedNeeds> {
-  if (await shouldUseMock()) {
-    return mockExtractNeeds(conversationHistory)
+  try {
+    return await realExtractNeeds(conversationHistory)
+  } catch (e) {
+    if (e instanceof TypeError && e.message.includes('fetch')) {
+      return mockExtractNeeds(conversationHistory)
+    }
+    throw e
   }
-  return realExtractNeeds(conversationHistory)
 }
 
-// —— Real API implementation ——
+// —— Real API implementation (via proxy) ——
 
 async function callClaude(
   systemPrompt: string,
   messages: { role: 'user' | 'assistant'; content: string }[],
   maxTokens = 512
 ): Promise<string> {
-  const apiKey = await getApiKey()
-  if (!apiKey) throw new Error('API key not available')
-
-  const response = await fetch(ANTHROPIC_API_URL, {
+  const response = await fetch(`${API_URL}/api/chat`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      model: ANTHROPIC_MODEL,
-      max_tokens: maxTokens,
       system: systemPrompt,
       messages,
+      max_tokens: maxTokens,
     }),
   })
 
   if (!response.ok) {
     const errorText = await response.text()
-    // Parse Anthropic error for a user-friendly message
     try {
       const parsed = JSON.parse(errorText)
-      throw new Error(parsed.error?.message || `API error (${response.status})`)
+      const msg = parsed.error?.message || parsed.error || `API error (${response.status})`
+      throw new Error(typeof msg === 'string' ? msg : `API error (${response.status})`)
     } catch (e) {
       if (e instanceof Error && !e.message.includes('API error')) throw e
       throw new Error(`API error (${response.status})`)
@@ -136,7 +116,6 @@ async function realExtractNeeds(
 ): Promise<ExtractedNeeds> {
   const messages = toAnthropicMessages(conversationHistory)
 
-  // Add a final user message asking for extraction
   const extractionMessages = [
     ...messages,
     {
@@ -165,7 +144,7 @@ async function realExtractNeeds(
   }
 }
 
-// —— Mock implementation (Phase 1) ——
+// —— Mock implementation (fallback) ——
 
 function mockGenerateFollowUp(request: LLMRequest): LLMResponse {
   const { conversationHistory } = request

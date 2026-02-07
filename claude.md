@@ -19,7 +19,8 @@ Use this file to understand the codebase when working on it with Claude (e.g. Cl
 - **shadcn/ui** — UI components in `src/components/ui/` (Radix primitives + CVA + `cn()` from `@/lib/utils`)
 - **React Router** — client-side routing (no backend routes)
 - **State:** `useState` and React Context only (`ConversationContext`). No Redux/Zustand.
-- **LLM:** Abstract service in `src/services/llmService.ts`. **Phase 1:** mock (keyword pattern matching). **Phase 2:** swap to real API (e.g. Claude); use `USE_MOCK_LLM` and the same interfaces.
+- **LLM:** `src/services/llmService.ts` calls Claude via proxy (`/api/chat`). Falls back to mock (keyword pattern matching) on network failure. System prompts in `src/services/systemPrompt.ts`.
+- **Hosting:** Cloudflare Pages (frontend) + Cloudflare Worker (API proxy). See `DEPLOYMENT.md`.
 
 ## Project structure
 
@@ -41,11 +42,16 @@ src/
 ├── types/
 │   └── index.ts              # Designer, ConversationMessage, ConversationState, ExtractedNeeds, FilterState
 ├── services/
-│   └── llmService.ts         # generateFollowUp(), extractNeeds(); mock or real
+│   ├── llmService.ts         # generateFollowUp(), extractNeeds(); real API with mock fallback
+│   └── systemPrompt.ts       # SYSTEM_PROMPT, EXTRACT_NEEDS_PROMPT (grounded in designer data)
 ├── lib/
 │   └── utils.ts              # cn() for classnames
 ├── App.tsx                   # ConversationProvider + Routes
 └── main.tsx
+
+worker/
+├── index.js                  # Cloudflare Worker — API proxy (plain JS, no build step)
+└── wrangler.toml             # Worker config (name, entry point)
 ```
 
 - **Import alias:** `@/` → `src/` (see `tsconfig.json` and `tsconfig.app.json`).
@@ -87,14 +93,17 @@ src/
 
 ```bash
 npm install
-npm run dev      # http://localhost:5173
-npm run build
-npm run preview
+npm run dev          # http://localhost:5173 (needs .env.local with ANTHROPIC_API_KEY for real LLM)
+npx vite build       # Production build (use this instead of npm run build to skip tsc strict checks)
+npm run preview      # Preview production build locally
 ```
+
+For deployment commands, see `DEPLOYMENT.md`.
 
 ## Working on this codebase
 
 - **New features:** Read `specs/requirements.md` and `specs/design.md` (or `specs/start.md`) before implementing. Update `specs/progress.md` when you complete items. Optionally update `specs/HANDOFF.md` at end of session.
 - **Bugs:** Check `ConversationContext` and `llmService` for conversation flow; check `FilterBar` and `ResultsPage` for filter/sort state.
 - **Styling:** Prefer Tailwind + shadcn theme tokens. Edit `src/index.css` for CSS variables; edit `tailwind.config.js` for theme extensions.
-- **Phase 2 LLM:** Implement `realLLMCall` and `realExtractNeeds` in `llmService.ts`, set `USE_MOCK_LLM = false`, and add API keys via env (never commit secrets).
+- **LLM / API:** Real Claude integration is live. API key goes in `.env.local` (local) or Worker secret (prod). Never commit secrets. See `DEPLOYMENT.md` for details.
+- **Deploying:** See `DEPLOYMENT.md` for full guide (Cloudflare Pages + Worker).

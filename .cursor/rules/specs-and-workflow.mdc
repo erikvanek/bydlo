@@ -1,0 +1,20 @@
+---
+description: "Spec and PM workflow — read specs from specs/ before implementing"
+globs: "specs/**/*.md"
+alwaysApply: true
+---
+
+# Specs and workflow
+
+- **Specification and PM workflow live in `specs/`.**
+  - `specs/requirements.md` — EARS acceptance criteria and user stories (source of truth for *what* to build).
+  - `specs/design.md` — Architecture, component hierarchy, boundaries (do not violate).
+  - `specs/start.md` — Full product specification.
+  - `specs/tasks.md` — Ordered implementation checklist.
+  - `specs/progress.md` — Implementation status tracker.
+  - `specs/workflow.md` — Multi-tool AI playbook (phases, tool choice, iteration).
+  - `specs/notes/wireframes.md` — ASCII wireframes for layout reference.
+  - `specs/HANDOFF.md` — Session handoff: what was done, what’s pending, decisions. Update after coding sessions.
+
+- Before implementing a feature, read the relevant spec (requirements, design, or start.md). After completing work, update `specs/progress.md` and optionally `specs/HANDOFF.md`.
+- Do not add scope that is listed as out of scope in requirements.md or design.md (e.g. auth, payments, backend, database).

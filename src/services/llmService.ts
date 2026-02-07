@@ -12,17 +12,40 @@ export interface LLMResponse {
   shouldContinue: boolean
 }
 
-/** Auto-detect: if API key is present, use real Claude. Otherwise, fall back to mock. */
-const USE_MOCK_LLM = !import.meta.env.VITE_ANTHROPIC_API_KEY
-
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages'
 const ANTHROPIC_MODEL = 'claude-sonnet-4-20250514'
+
+// —— Runtime API key fetching (never bundled) ——
+
+/** undefined = not yet fetched, null = no key available, string = key */
+let _cachedApiKey: string | null | undefined = undefined
+
+async function getApiKey(): Promise<string | null> {
+  if (_cachedApiKey !== undefined) return _cachedApiKey
+  try {
+    const res = await fetch('/api/config')
+    if (!res.ok) {
+      _cachedApiKey = null
+      return null
+    }
+    const data = await res.json()
+    _cachedApiKey = data.apiKey || null
+  } catch {
+    _cachedApiKey = null
+  }
+  return _cachedApiKey
+}
+
+async function shouldUseMock(): Promise<boolean> {
+  const key = await getApiKey()
+  return !key
+}
 
 /**
  * Generate next follow-up question based on conversation so far.
  */
 export async function generateFollowUp(request: LLMRequest): Promise<LLMResponse> {
-  if (USE_MOCK_LLM) {
+  if (await shouldUseMock()) {
     return mockGenerateFollowUp(request)
   }
   return realLLMCall(request)
@@ -34,7 +57,7 @@ export async function generateFollowUp(request: LLMRequest): Promise<LLMResponse
 export async function extractNeeds(
   conversationHistory: ConversationMessage[]
 ): Promise<ExtractedNeeds> {
-  if (USE_MOCK_LLM) {
+  if (await shouldUseMock()) {
     return mockExtractNeeds(conversationHistory)
   }
   return realExtractNeeds(conversationHistory)
@@ -47,8 +70,8 @@ async function callClaude(
   messages: { role: 'user' | 'assistant'; content: string }[],
   maxTokens = 512
 ): Promise<string> {
-  const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY
-  if (!apiKey) throw new Error('VITE_ANTHROPIC_API_KEY is not set')
+  const apiKey = await getApiKey()
+  if (!apiKey) throw new Error('API key not available')
 
   const response = await fetch(ANTHROPIC_API_URL, {
     method: 'POST',
@@ -67,13 +90,20 @@ async function callClaude(
   })
 
   if (!response.ok) {
-    const error = await response.text()
-    throw new Error(`Claude API error (${response.status}): ${error}`)
+    const errorText = await response.text()
+    // Parse Anthropic error for a user-friendly message
+    try {
+      const parsed = JSON.parse(errorText)
+      throw new Error(parsed.error?.message || `API error (${response.status})`)
+    } catch (e) {
+      if (e instanceof Error && !e.message.includes('API error')) throw e
+      throw new Error(`API error (${response.status})`)
+    }
   }
 
   const data = await response.json()
   const textBlock = data.content?.find((b: { type: string }) => b.type === 'text')
-  if (!textBlock?.text) throw new Error('No text in Claude response')
+  if (!textBlock?.text) throw new Error('No text in response')
 
   return textBlock.text
 }

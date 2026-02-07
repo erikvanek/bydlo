@@ -1,0 +1,15 @@
+---
+description: "React and shadcn component standards for this prototype"
+globs: "src/components/**/*.tsx, src/pages/**/*.tsx"
+alwaysApply: true
+---
+
+# Component standards
+
+- **UI primitives:** Use shadcn/ui components from `@/components/ui/` (Button, Card, Input, Textarea, Select, Badge, Dialog, Slider, Checkbox, Avatar, Separator). Prefer these over raw HTML or one-off styled divs.
+- **NEVER modify files in `src/components/ui/`** — they are shadcn base components. Compose them in feature components under `src/components/` or in pages.
+- **TypeScript:** Define interfaces for all component props; avoid `any`.
+- **Styling:** Tailwind CSS utility classes only. Use theme tokens where possible (`bg-primary`, `text-muted-foreground`, `border-input`). No inline styles or CSS modules for component layout.
+- **Async and loading:** Components that depend on LLM or async data should show loading states and handle errors (e.g. ConversationPage: loading indicator, error message with retry/dismiss).
+- **State:** Use React Context (`ConversationContext`) and `useState` only; no Redux, Zustand, or other global state library.
+- **File naming:** PascalCase for components (e.g. `DesignerCard.tsx`), camelCase for utilities.

@@ -31,31 +31,28 @@ Open [http://localhost:5173](http://localhost:5173).
 
 - `src/pages/` — route-level pages (Landing, Describe, Conversation, Results, Browse, Designer detail)
 - `src/components/` — SituationInput, ConversationThread, DesignerCard, DesignerProfile, FilterBar
-- `src/components/ui/` — minimal UI stubs (replace with shadcn when you run `npx shadcn@latest add …`)
+- `src/components/ui/` — shadcn/ui components (do not modify; add via `npx shadcn@latest add …`)
 - `src/context/ConversationContext.tsx` — conversation state for Journey 1
 - `src/services/llmService.ts` — LLM abstraction (mock by default; set `USE_MOCK_LLM = false` and implement API for Phase 2)
 - `src/data/designers.ts` — 14 mock designers (Prague, Brno, Olomouc, Ostrava)
 - `src/types/index.ts` — shared types
 
-## Replacing the UI stubs with shadcn
+## Specs and workflow (`specs/`)
 
-The app currently uses minimal stub components in `src/components/ui/`. To replace them with real shadcn/ui components:
+All specification and PM-style workflow live in **`specs/`**:
 
-**1. Initialize shadcn** (sets up Tailwind theme, CSS variables, `components.json`, and `src/lib/utils.ts`):
+| File | Purpose |
+|------|--------|
+| [specs/requirements.md](specs/requirements.md) | EARS acceptance criteria and user stories |
+| [specs/design.md](specs/design.md) | Architecture, component hierarchy, boundaries |
+| [specs/start.md](specs/start.md) | Full product specification |
+| [specs/tasks.md](specs/tasks.md) | Ordered implementation checklist |
+| [specs/progress.md](specs/progress.md) | Implementation status tracker |
+| [specs/workflow.md](specs/workflow.md) | Multi-tool AI playbook (phases, tool choice, iteration) |
+| [specs/notes/wireframes.md](specs/notes/wireframes.md) | ASCII wireframes |
+| [specs/HANDOFF.md](specs/HANDOFF.md) | Session handoff (update after coding sessions) |
 
-```bash
-npx shadcn@latest init
-```
-
-When prompted, choose: **Style:** Default · **Base color:** Slate · **CSS variables:** Yes.
-
-**2. Add the components** (installs Radix primitives and other deps, and **overwrites** the stubs in `src/components/ui/`):
-
-```bash
-npx shadcn@latest add button card input textarea select badge dialog slider checkbox avatar separator
-```
-
-No manual copy-paste is needed — the CLI writes the real components into `src/components/ui/`. The existing feature components (SituationInput, DesignerCard, etc.) use the same props, so they should work as-is. If the CLI asks to overwrite files, confirm yes.
+**For AI tools (Claude, Gemini, Cursor):** This repo is set up for multi-tool use. Read **`claude.md`** or **`gemini.md`** at the repo root first for project context and conventions. All specification and PM workflow live in **`specs/`** — read the relevant spec (requirements, design, or start) before implementing; update **`specs/progress.md`** and **`specs/HANDOFF.md`** after sessions. The playbook for which tool to use when is in **`specs/workflow.md`**. In Cursor, **`.cursor/rules/`** contains scoped rules (specs-first workflow, component standards).
 
 ## Routes
 
@@ -68,6 +65,8 @@ No manual copy-paste is needed — the CLI writes the real components into `src/
 | `/browse` | Browse all designers (Journey 2) |
 | `/designer/:id` | Designer profile + “Book consultation” (simulated) |
 
-## Spec
+## Spec and workflow
 
-See [specs/start.md](specs/start.md) for the full discovery prototype specification.
+- Full product spec: [specs/start.md](specs/start.md).
+- Requirements (EARS) and design: [specs/requirements.md](specs/requirements.md), [specs/design.md](specs/design.md).
+- Multi-tool AI workflow: [specs/workflow.md](specs/workflow.md).

@@ -13,7 +13,7 @@ export function ConversationPage() {
 
   useEffect(() => {
     if (!state?.initialDescription) {
-      navigate('/describe', { replace: true })
+      navigate('/', { replace: true })
       return
     }
 

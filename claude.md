@@ -2,6 +2,8 @@
 
 Use this file to understand the codebase when working on it with Claude (e.g. Claude Code, Cursor with Claude, or other tools).
 
+**Spec-first workflow:** All specification and PM workflow live in **`specs/`**. Before implementing a feature, read **`specs/requirements.md`** (EARS acceptance criteria) and **`specs/design.md`** (architecture and boundaries), or **`specs/start.md`** for the full spec. Use **`specs/tasks.md`** for the ordered checklist and **`specs/notes/wireframes.md`** for layout reference. After coding, update **`specs/progress.md`** and **`specs/HANDOFF.md`** so the next session or tool has context. The multi-tool playbook (which tool for which phase) is in **`specs/workflow.md`**.
+
 ## What this project is
 
 **Bydlo** is a **discovery prototype** for a designer matchmaking platform. It connects freelance designers/architects with people in transitional living situations (shared flats, couples moving in, small renovations). The app is used in the second half of discovery interviews to validate demand and get feedback on the concept.
@@ -47,7 +49,15 @@ src/
 ```
 
 - **Import alias:** `@/` → `src/` (see `tsconfig.json` and `tsconfig.app.json`).
-- **Spec and progress:** Full spec is in `specs/start.md`. Implementation status is in `specs/progress.md`.
+- **Specification and PM workflow live in `specs/`:**
+  - `specs/requirements.md` — EARS acceptance criteria and user stories (*what* to build).
+  - `specs/design.md` — Architecture, component hierarchy, boundaries.
+  - `specs/start.md` — Full product specification.
+  - `specs/tasks.md` — Ordered implementation checklist.
+  - `specs/progress.md` — Implementation status tracker.
+  - `specs/workflow.md` — Multi-tool AI playbook (phases, tool choice).
+  - `specs/notes/wireframes.md` — ASCII wireframes.
+  - `specs/HANDOFF.md` — Session handoff; update after coding sessions.
 
 ## User journeys
 
@@ -84,7 +94,7 @@ npm run preview
 
 ## Working on this codebase
 
-- **New features:** Align with `specs/start.md` (acceptance criteria, scope, DO/DON’T). Update `specs/progress.md` when you complete items.
+- **New features:** Read `specs/requirements.md` and `specs/design.md` (or `specs/start.md`) before implementing. Update `specs/progress.md` when you complete items. Optionally update `specs/HANDOFF.md` at end of session.
 - **Bugs:** Check `ConversationContext` and `llmService` for conversation flow; check `FilterBar` and `ResultsPage` for filter/sort state.
 - **Styling:** Prefer Tailwind + shadcn theme tokens. Edit `src/index.css` for CSS variables; edit `tailwind.config.js` for theme extensions.
 - **Phase 2 LLM:** Implement `realLLMCall` and `realExtractNeeds` in `llmService.ts`, set `USE_MOCK_LLM = false`, and add API keys via env (never commit secrets).

@@ -1,4 +1,5 @@
 import type { ConversationMessage, ExtractedNeeds } from '@/types'
+import { EXTRACT_NEEDS_PROMPT } from './systemPrompt'
 
 export interface LLMRequest {
   conversationHistory: ConversationMessage[]
@@ -11,12 +12,14 @@ export interface LLMResponse {
   shouldContinue: boolean
 }
 
-const USE_MOCK_LLM = true
+/** Auto-detect: if API key is present, use real Claude. Otherwise, fall back to mock. */
+const USE_MOCK_LLM = !import.meta.env.VITE_ANTHROPIC_API_KEY
+
+const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages'
+const ANTHROPIC_MODEL = 'claude-sonnet-4-20250514'
 
 /**
  * Generate next follow-up question based on conversation so far.
- * Phase 1: mock responses via pattern matching.
- * Phase 2: swap to real Claude/API call.
  */
 export async function generateFollowUp(request: LLMRequest): Promise<LLMResponse> {
   if (USE_MOCK_LLM) {
@@ -35,6 +38,101 @@ export async function extractNeeds(
     return mockExtractNeeds(conversationHistory)
   }
   return realExtractNeeds(conversationHistory)
+}
+
+// —— Real API implementation ——
+
+async function callClaude(
+  systemPrompt: string,
+  messages: { role: 'user' | 'assistant'; content: string }[],
+  maxTokens = 512
+): Promise<string> {
+  const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY
+  if (!apiKey) throw new Error('VITE_ANTHROPIC_API_KEY is not set')
+
+  const response = await fetch(ANTHROPIC_API_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true',
+    },
+    body: JSON.stringify({
+      model: ANTHROPIC_MODEL,
+      max_tokens: maxTokens,
+      system: systemPrompt,
+      messages,
+    }),
+  })
+
+  if (!response.ok) {
+    const error = await response.text()
+    throw new Error(`Claude API error (${response.status}): ${error}`)
+  }
+
+  const data = await response.json()
+  const textBlock = data.content?.find((b: { type: string }) => b.type === 'text')
+  if (!textBlock?.text) throw new Error('No text in Claude response')
+
+  return textBlock.text
+}
+
+/** Convert internal ConversationMessage[] to Anthropic messages format. */
+function toAnthropicMessages(
+  history: ConversationMessage[]
+): { role: 'user' | 'assistant'; content: string }[] {
+  return history.map((m) => ({ role: m.role, content: m.content }))
+}
+
+async function realLLMCall(request: LLMRequest): Promise<LLMResponse> {
+  const messages = toAnthropicMessages(request.conversationHistory)
+  const text = await callClaude(request.systemPrompt, messages)
+
+  // Detect [COMPLETE] prefix
+  const isComplete = text.startsWith('[COMPLETE]')
+  const cleanMessage = isComplete
+    ? text.replace(/^\[COMPLETE\]\s*/, '')
+    : text
+
+  return {
+    message: cleanMessage,
+    shouldContinue: !isComplete,
+  }
+}
+
+async function realExtractNeeds(
+  conversationHistory: ConversationMessage[]
+): Promise<ExtractedNeeds> {
+  const messages = toAnthropicMessages(conversationHistory)
+
+  // Add a final user message asking for extraction
+  const extractionMessages = [
+    ...messages,
+    {
+      role: 'user' as const,
+      content: 'Please extract the structured needs from our conversation as JSON.',
+    },
+  ]
+
+  try {
+    const text = await callClaude(EXTRACT_NEEDS_PROMPT, extractionMessages, 1024)
+
+    // Try to parse JSON — handle cases where model wraps in ```json
+    const jsonStr = text.replace(/^```json?\n?/, '').replace(/\n?```$/, '').trim()
+    const parsed = JSON.parse(jsonStr)
+
+    return {
+      spaceType: parsed.spaceType ?? undefined,
+      budget: typeof parsed.budget === 'number' ? parsed.budget : undefined,
+      timeline: parsed.timeline ?? undefined,
+      priorities: Array.isArray(parsed.priorities) ? parsed.priorities : undefined,
+      constraints: Array.isArray(parsed.constraints) ? parsed.constraints : undefined,
+    }
+  } catch (e) {
+    console.warn('Failed to extract needs from Claude response, falling back to empty:', e)
+    return {}
+  }
 }
 
 // —— Mock implementation (Phase 1) ——
@@ -124,16 +222,4 @@ function mockExtractNeeds(conversationHistory: ConversationMessage[]): Extracted
   if (allText.includes('brno')) needs.constraints = ['Brno']
 
   return needs
-}
-
-// —— Real API stubs (Phase 2) ——
-
-async function realLLMCall(_request: LLMRequest): Promise<LLMResponse> {
-  // TODO: call Anthropic Claude API or similar
-  return mockGenerateFollowUp(_request)
-}
-
-async function realExtractNeeds(_conversationHistory: ConversationMessage[]): Promise<ExtractedNeeds> {
-  // TODO: call LLM to summarize conversation into structured needs
-  return mockExtractNeeds(_conversationHistory)
 }

@@ -28,7 +28,7 @@ export function SituationInput({
         className="min-h-[120px]"
         maxLength={500}
       />
-      <p className="text-sm text-slate-500">
+      <p className="text-sm text-muted-foreground">
         {value.length} characters {value.length >= MIN_LENGTH ? '— ready to continue' : `(min ${MIN_LENGTH})`}
       </p>
       <Button onClick={() => onSubmit(value.trim())} disabled={!valid}>

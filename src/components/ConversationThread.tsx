@@ -43,8 +43,8 @@ export function ConversationThread({
         ))}
         {isWaitingForLLM && (
           <div className="flex gap-3">
-            <div className="h-8 w-8 shrink-0 rounded-full bg-slate-200 flex items-center justify-center text-xs">AI</div>
-            <div className="rounded-lg border bg-slate-50 px-4 py-3 text-sm text-slate-500">
+            <div className="h-8 w-8 shrink-0 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-medium">B</div>
+            <div className="rounded-lg border bg-muted px-4 py-3 text-sm text-muted-foreground">
               Thinking…
             </div>
           </div>

@@ -55,13 +55,13 @@ export function ResultsPage() {
   const specialties = useMemo(() => [...new Set(designers.map((d) => (d.specialty === 'interior' ? 'Interior Design' : d.specialty === 'architect' ? 'Architecture' : 'Both')))], [])
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <main className="max-w-4xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-background">
+      <main className="max-w-5xl mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold mb-2">
           We found {filteredAndScored.length} designers for you
         </h1>
         {state?.extractedNeeds && Object.keys(state.extractedNeeds).length > 0 && (
-          <p className="text-slate-600 text-sm mb-6">
+          <p className="text-muted-foreground text-sm mb-6">
             Based on: {state.extractedNeeds.spaceType ?? 'your space'}, {state.extractedNeeds.budget ? `budget ~€${state.extractedNeeds.budget}` : 'budget flexible'}, {state.extractedNeeds.timeline ?? 'timeline flexible'}
           </p>
         )}
@@ -82,7 +82,7 @@ export function ResultsPage() {
             <option value="location">Sort by location</option>
           </select>
         </div>
-        <div className="grid gap-4 mt-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-5 mt-6 sm:grid-cols-1 lg:grid-cols-2">
           {filteredAndScored.map((designer) => (
             <DesignerCard
               key={designer.id}
@@ -93,7 +93,7 @@ export function ResultsPage() {
           ))}
         </div>
         {filteredAndScored.length === 0 && (
-          <p className="text-slate-500 text-center py-12">No designers found. Try adjusting your filters.</p>
+          <p className="text-muted-foreground text-center py-12">No designers found. Try adjusting your filters.</p>
         )}
       </main>
     </div>

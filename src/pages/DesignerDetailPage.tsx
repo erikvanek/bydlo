@@ -9,13 +9,13 @@ export function DesignerDetailPage() {
 
   if (!designer) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <p className="text-slate-600">Designer not found.</p>
+          <p className="text-muted-foreground">Designer not found.</p>
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="text-slate-900 underline mt-2"
+            className="text-foreground underline mt-2"
           >
             Go back
           </button>
@@ -25,7 +25,7 @@ export function DesignerDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background">
       <main className="max-w-2xl mx-auto px-4 py-8">
         <DesignerProfile
           designer={designer}

@@ -117,12 +117,12 @@ export function ConversationPage() {
   if (!state) return null
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
       <main className="flex-1 max-w-2xl mx-auto w-full px-4 py-6">
         <Card className="flex flex-col h-[calc(100vh-6rem)]">
           <CardHeader className="shrink-0">
             <h1 className="text-xl font-bold">A few questions</h1>
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-muted-foreground">
               Your situation: {state.initialDescription}
             </p>
           </CardHeader>

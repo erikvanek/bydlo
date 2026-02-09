@@ -127,22 +127,22 @@ export function LandingPage() {
   const allComplete = detectedCount === CHECKLIST_ITEMS.length
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-background">
 
       {/* Hero */}
-      <section className="pt-20 pb-8 lg:pt-28 lg:pb-12">
+      <section className="pt-24 pb-12 lg:pt-36 lg:pb-16">
         <div className="max-w-5xl mx-auto px-4">
-          <h1 className="text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 leading-[1.1]">
+          <h1 className="text-6xl lg:text-7xl font-black tracking-tight text-foreground leading-[1.05] text-balance">
             Bydlo
           </h1>
-          <p className="mt-4 text-xl lg:text-2xl text-slate-500 max-w-2xl leading-relaxed">
+          <p className="mt-5 text-xl lg:text-2xl max-w-2xl leading-relaxed text-gradient-fade">
             Helping you live better — one room at a time.
           </p>
         </div>
       </section>
 
       {/* Main content */}
-      <main className="max-w-5xl mx-auto px-4 pb-24">
+      <main className="max-w-5xl mx-auto px-4 pb-32">
 
         {/* Two-column section */}
         <div className="grid gap-10 lg:grid-cols-12 items-start">
@@ -150,7 +150,7 @@ export function LandingPage() {
           {/* Left column: Input + Scenarios */}
           <div className="lg:col-span-8 space-y-5">
 
-            <p className="text-base text-slate-600">
+            <p className="text-base text-muted-foreground">
               Describe your living situation and we'll match you with a freelance
               designer who can help.
             </p>
@@ -163,7 +163,7 @@ export function LandingPage() {
                   value={situationText}
                   onChange={(e) => setSituationText(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  className="min-h-[140px] lg:min-h-[180px] pr-14 resize-none text-base shadow-sm border-slate-200 focus-visible:ring-slate-400"
+                  className="min-h-[140px] lg:min-h-[180px] pr-14 resize-none text-base shadow-sm focus-visible:ring-ring"
                   maxLength={500}
                 />
                 <Button
@@ -187,7 +187,7 @@ export function LandingPage() {
 
             {/* Quick scenarios */}
             <div className="space-y-2">
-              <p className="text-xs font-medium uppercase tracking-wider text-slate-400">
+              <p className="text-xs font-medium uppercase tracking-wider text-subtle">
                 Typical scenarios
               </p>
               <div className="flex flex-wrap gap-2">
@@ -196,7 +196,7 @@ export function LandingPage() {
                     key={ex.label}
                     variant="outline"
                     size="sm"
-                    className="text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
+                    className="text-muted-foreground hover:text-foreground hover:bg-muted/50"
                     onClick={() => setSituationText(ex.text)}
                   >
                     {ex.label}
@@ -211,7 +211,7 @@ export function LandingPage() {
             <Card className={`relative overflow-hidden transition-all duration-500 ${
               allComplete
                 ? 'border-emerald-200 bg-emerald-50/30 shadow-sm shadow-emerald-100'
-                : 'border-slate-100 shadow-none bg-slate-50/50'
+                : 'border-0 shadow-[0_1px_3px_0_rgb(0_0_0/0.03)] bg-card'
             }`}>
               <CardContent className="p-5">
 
@@ -226,17 +226,17 @@ export function LandingPage() {
                     pointerEvents: showChecklist ? 'none' : undefined,
                   }}
                 >
-                  <p className="text-xs font-medium uppercase tracking-wider text-slate-400 mb-3">
+                  <p className="text-xs font-medium uppercase tracking-wider text-subtle mb-3">
                     How it works
                   </p>
                   <ol className="space-y-2.5">
                     {WORKFLOW_STEPS.map((step, i) => (
                       <li key={i} className="flex items-start gap-2.5">
-                        <span className="flex items-center justify-center h-5 w-5 rounded-full border border-slate-300 text-[11px] font-semibold text-slate-400 shrink-0 mt-0.5">
+                        <span className="flex items-center justify-center h-5 w-5 rounded-full border border-border text-[11px] font-semibold text-subtle shrink-0 mt-0.5">
                           {i + 1}
                         </span>
-                        <p className="text-sm text-slate-500">
-                          <span className="font-medium text-slate-700">{step.title}</span>{' '}
+                        <p className="text-sm text-muted-foreground">
+                          <span className="font-medium text-foreground">{step.title}</span>{' '}
                           {step.description}
                         </p>
                       </li>
@@ -256,7 +256,7 @@ export function LandingPage() {
                   }}
                 >
                   <p className={`text-xs font-medium uppercase tracking-wider mb-3 transition-colors duration-300 ${
-                    allComplete ? 'text-emerald-500' : 'text-slate-400'
+                    allComplete ? 'text-emerald-500' : 'text-subtle'
                   }`}>
                     Your situation
                   </p>
@@ -271,7 +271,7 @@ export function LandingPage() {
                             className={`flex items-center justify-center h-5 w-5 rounded-full shrink-0 mt-0.5 text-[11px] font-semibold ${
                               detected
                                 ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
-                                : 'border border-slate-200 text-slate-300'
+                                : 'border border-border text-subtle'
                             }`}
                           >
                             {detected ? '\u2713' : '\u25CB'}
@@ -280,13 +280,13 @@ export function LandingPage() {
                             <p
                               className={`text-sm ${
                                 detected
-                                  ? 'font-medium text-slate-700'
-                                  : 'text-slate-400'
+                                  ? 'font-medium text-foreground'
+                                  : 'text-subtle'
                               }`}
                             >
                               {item.label}
                             </p>
-                            <p className="text-xs text-slate-400 truncate">
+                            <p className="text-xs text-subtle truncate">
                               {detected ? value : item.hint}
                             </p>
                           </div>
@@ -297,7 +297,7 @@ export function LandingPage() {
 
                   {/* Progress summary */}
                   <div className={`mt-4 pt-3 border-t transition-colors duration-300 ${
-                    allComplete ? 'border-emerald-100' : 'border-slate-100'
+                    allComplete ? 'border-emerald-100' : 'border-border'
                   }`}>
                     {allComplete ? (
                       <div className="flex items-center gap-2 animate-in fade-in slide-in-from-bottom-1 duration-300">
@@ -309,7 +309,7 @@ export function LandingPage() {
                         </p>
                       </div>
                     ) : (
-                      <p className="text-xs text-slate-400">
+                      <p className="text-xs text-subtle">
                         {detectedCount} of {CHECKLIST_ITEMS.length} &mdash;{' '}
                         {progressLabel(detectedCount, CHECKLIST_ITEMS.length)}
                       </p>
@@ -323,16 +323,16 @@ export function LandingPage() {
         </div>
 
         {/* Featured consultants */}
-        <section className="mt-24">
+        <section className="mt-28 lg:mt-36">
           <div className="flex items-end justify-between mb-8">
-            <h2 className="text-2xl lg:text-3xl font-bold tracking-tight text-slate-900">
+            <h2 className="text-2xl lg:text-3xl font-bold tracking-tight text-foreground text-balance">
               Meet our consultants
             </h2>
             <Button variant="outline" size="sm" asChild>
               <Link to="/browse">See all &rarr;</Link>
             </Button>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-5 sm:grid-cols-1 lg:grid-cols-2">
             {featuredDesigners.map((designer) => (
               <DesignerCard
                 key={designer.id}

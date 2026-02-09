@@ -18,7 +18,7 @@ const specialtyLabel: Record<Designer['specialty'], string> = {
 
 export function DesignerCard({ designer, showMatchScore = false, onViewProfile }: DesignerCardProps) {
   return (
-    <Card className="overflow-hidden hover:shadow-md transition-shadow">
+    <Card className="overflow-hidden border border-transparent shadow-[0_1px_3px_0_rgb(0_0_0/0.04)] hover:shadow-[0_8px_24px_0_rgb(0_0_0/0.06)] hover:-translate-y-0.5 hover:border-primary/30 transition-all duration-300 ease-out">
       <CardContent className="p-0">
         <div className="flex gap-4 p-4">
           <Avatar className="h-16 w-16 shrink-0">
@@ -27,16 +27,16 @@ export function DesignerCard({ designer, showMatchScore = false, onViewProfile }
           </Avatar>
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2">
-              <h3 className="font-semibold text-slate-900">{designer.name}</h3>
+              <h3 className="font-semibold text-foreground">{designer.name}</h3>
               {showMatchScore && designer.matchScore != null && (
                 <Badge variant="secondary">{designer.matchScore}% match</Badge>
               )}
             </div>
             <Badge variant="outline" className="mt-1">{specialtyLabel[designer.specialty]}</Badge>
-            <p className="text-sm text-slate-500 mt-1">
+            <p className="text-sm text-muted-foreground mt-1">
               {designer.location} · €{designer.hourlyRate}/hr · {designer.availability.replace(/-/g, ' ')}
             </p>
-            <p className="text-sm text-slate-600 mt-2 line-clamp-2">{designer.shortBio}</p>
+            <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{designer.shortBio}</p>
           </div>
         </div>
       </CardContent>

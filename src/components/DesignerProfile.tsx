@@ -61,14 +61,14 @@ export function DesignerProfile({ designer, onBack }: DesignerProfileProps) {
         <button
           type="button"
           onClick={onBack}
-          className="text-sm text-slate-500 hover:text-slate-900 transition-colors"
+          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           &larr; Back to results
         </button>
 
         {/* Hero: avatar + key info + CTA */}
         <div className="flex flex-col sm:flex-row gap-6">
-          <Avatar className="h-28 w-28 shrink-0 ring-2 ring-slate-100">
+          <Avatar className="h-28 w-28 shrink-0 ring-2 ring-border">
             <AvatarImage src={designer.photo} alt={designer.name} />
             <AvatarFallback className="text-3xl font-semibold">
               {designer.name.slice(0, 2)}
@@ -77,16 +77,16 @@ export function DesignerProfile({ designer, onBack }: DesignerProfileProps) {
 
           <div className="flex-1 space-y-3">
             <div>
-              <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
+              <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
                 {designer.name}
               </h1>
               <div className="flex flex-wrap items-center gap-2 mt-1.5">
                 <Badge>{specialtyLabel[designer.specialty]}</Badge>
-                <span className="text-sm text-slate-500">
+                <span className="text-sm text-muted-foreground">
                   {designer.location}
                 </span>
-                <span className="text-slate-300">&middot;</span>
-                <span className="text-sm text-slate-500">
+                <span className="text-subtle">&middot;</span>
+                <span className="text-sm text-muted-foreground">
                   {designer.yearsExperience} years experience
                 </span>
               </div>
@@ -95,11 +95,11 @@ export function DesignerProfile({ designer, onBack }: DesignerProfileProps) {
             <div className="flex flex-wrap items-center gap-4 text-sm">
               <div className="flex items-center gap-1.5">
                 <span className="inline-flex items-center justify-center h-2 w-2 rounded-full bg-emerald-500" />
-                <span className="text-slate-600">
+                <span className="text-muted-foreground">
                   {availabilityLabel[designer.availability]}
                 </span>
               </div>
-              <span className="font-semibold text-slate-900">
+              <span className="font-semibold text-foreground">
                 &euro;{designer.hourlyRate}/hr
               </span>
             </div>
@@ -124,21 +124,21 @@ export function DesignerProfile({ designer, onBack }: DesignerProfileProps) {
 
         {/* About */}
         <section className="space-y-2">
-          <h2 className="text-lg font-bold text-slate-900">About</h2>
-          <p className="text-slate-700 leading-relaxed">{designer.shortBio}</p>
+          <h2 className="text-lg font-bold text-foreground">About</h2>
+          <p className="text-foreground leading-relaxed">{designer.shortBio}</p>
         </section>
 
         {/* Approach */}
         <section className="space-y-2">
-          <h2 className="text-lg font-bold text-slate-900">How I work</h2>
-          <p className="text-slate-600 leading-relaxed">{designer.approach}</p>
+          <h2 className="text-lg font-bold text-foreground">How I work</h2>
+          <p className="text-muted-foreground leading-relaxed">{designer.approach}</p>
         </section>
 
         <Separator />
 
         {/* Portfolio */}
         <section className="space-y-4">
-          <h2 className="text-lg font-bold text-slate-900">Portfolio</h2>
+          <h2 className="text-lg font-bold text-foreground">Portfolio</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {designer.portfolioImages.map((src, i) => (
               <img
@@ -164,13 +164,13 @@ export function DesignerProfile({ designer, onBack }: DesignerProfileProps) {
 
         {/* Bottom CTA */}
         <section className="text-center py-4 space-y-3">
-          <p className="text-slate-600">
+          <p className="text-muted-foreground">
             Ready to get started with {designer.name.split(' ')[0]}?
           </p>
           <Button size="lg" onClick={handleBook} className="text-base px-8">
             Book a free intro call
           </Button>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-subtle">
             15 minutes &middot; no commitment &middot; free
           </p>
         </section>
@@ -193,7 +193,7 @@ export function DesignerProfile({ designer, onBack }: DesignerProfileProps) {
                 <div className="space-y-1.5">
                   <label
                     htmlFor="booking-name"
-                    className="text-sm font-medium text-slate-700"
+                    className="text-sm font-medium text-foreground"
                   >
                     Your name
                   </label>
@@ -207,7 +207,7 @@ export function DesignerProfile({ designer, onBack }: DesignerProfileProps) {
                 <div className="space-y-1.5">
                   <label
                     htmlFor="booking-email"
-                    className="text-sm font-medium text-slate-700"
+                    className="text-sm font-medium text-foreground"
                   >
                     Email
                   </label>
@@ -247,21 +247,21 @@ export function DesignerProfile({ designer, onBack }: DesignerProfileProps) {
                 </DialogDescription>
               </DialogHeader>
 
-              <div className="rounded-lg bg-slate-50 p-4 text-sm text-slate-600 space-y-1">
+              <div className="rounded-lg bg-muted p-4 text-sm text-muted-foreground space-y-1">
                 <p>
-                  <span className="font-medium text-slate-900">Call with:</span>{' '}
+                  <span className="font-medium text-foreground">Call with:</span>{' '}
                   {designer.name}
                 </p>
                 <p>
-                  <span className="font-medium text-slate-900">Duration:</span>{' '}
+                  <span className="font-medium text-foreground">Duration:</span>{' '}
                   15 minutes
                 </p>
                 <p>
-                  <span className="font-medium text-slate-900">Cost:</span>{' '}
+                  <span className="font-medium text-foreground">Cost:</span>{' '}
                   Free
                 </p>
                 <p>
-                  <span className="font-medium text-slate-900">
+                  <span className="font-medium text-foreground">
                     Confirmation sent to:
                   </span>{' '}
                   {email}

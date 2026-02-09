@@ -1,11 +1,12 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from 'react'
-import type { ConversationState, ConversationMessage, ExtractedNeeds } from '@/types'
+import type { ConversationState, ConversationMessage, ExtractedNeeds, DesignerScore } from '@/types'
 
 interface ConversationContextValue {
   state: ConversationState | null
   setInitialDescription: (description: string) => void
   addMessage: (message: Omit<ConversationMessage, 'id' | 'timestamp'>) => void
-  setComplete: (extractedNeeds: ExtractedNeeds) => void
+  setComplete: (extractedNeeds: ExtractedNeeds, designerScores?: DesignerScore[]) => void
+  setDesignerScores: (scores: DesignerScore[]) => void
   reset: () => void
 }
 
@@ -19,6 +20,7 @@ export function ConversationProvider({ children }: { children: ReactNode }) {
       initialDescription,
       messages: [],
       extractedNeeds: {},
+      designerScores: [],
       isComplete: false,
     })
   }, [])
@@ -39,9 +41,15 @@ export function ConversationProvider({ children }: { children: ReactNode }) {
     )
   }, [])
 
-  const setComplete = useCallback((extractedNeeds: ExtractedNeeds) => {
+  const setComplete = useCallback((extractedNeeds: ExtractedNeeds, designerScores?: DesignerScore[]) => {
     setState((prev) =>
-      prev ? { ...prev, extractedNeeds, isComplete: true } : null
+      prev ? { ...prev, extractedNeeds, designerScores: designerScores ?? [], isComplete: true } : null
+    )
+  }, [])
+
+  const setDesignerScores = useCallback((scores: DesignerScore[]) => {
+    setState((prev) =>
+      prev ? { ...prev, designerScores: scores } : null
     )
   }, [])
 
@@ -56,6 +64,7 @@ export function ConversationProvider({ children }: { children: ReactNode }) {
         setInitialDescription,
         addMessage,
         setComplete,
+        setDesignerScores,
         reset,
       }}
     >

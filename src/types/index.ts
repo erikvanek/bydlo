@@ -1,5 +1,11 @@
 // Core entities
 
+export interface DesignerScore {
+  designerId: string
+  score: number
+  reason: string
+}
+
 export interface Designer {
   id: string
   name: string
@@ -35,6 +41,7 @@ export interface ConversationState {
   initialDescription: string
   messages: ConversationMessage[]
   extractedNeeds: ExtractedNeeds
+  designerScores: DesignerScore[]
   isComplete: boolean
 }
 

@@ -1,5 +1,5 @@
-import type { ConversationMessage, ExtractedNeeds } from '@/types'
-import { EXTRACT_NEEDS_PROMPT, ANALYZE_DESCRIPTION_PROMPT } from './systemPrompt'
+import type { ConversationMessage, ExtractedNeeds, DesignerScore } from '@/types'
+import { EXTRACT_NEEDS_PROMPT, ANALYZE_DESCRIPTION_PROMPT, SCORE_DESIGNERS_PROMPT } from './systemPrompt'
 
 export interface LLMRequest {
   conversationHistory: ConversationMessage[]
@@ -99,6 +99,139 @@ export async function analyzeDescription(
     // Silently return empty on any error (network, parse, abort)
     return EMPTY_ANALYSIS
   }
+}
+
+/**
+ * Lightweight designer summary for the scoring prompt.
+ * Built client-side from the full Designer objects.
+ */
+export interface DesignerSummary {
+  id: string
+  name: string
+  specialty: string
+  location: string
+  hourlyRate: number
+  availability: string
+  yearsExperience: number
+  tags: string[]
+  shortBio: string
+  approach: string
+}
+
+/**
+ * LLM-based semantic scoring of all designers against the user's conversation.
+ * Uses Haiku for speed/cost. Falls back to naive scoring on failure.
+ */
+export async function scoreDesigners(
+  conversationHistory: ConversationMessage[],
+  extractedNeeds: ExtractedNeeds,
+  designerSummaries: DesignerSummary[]
+): Promise<DesignerScore[]> {
+  try {
+    return await realScoreDesigners(conversationHistory, extractedNeeds, designerSummaries)
+  } catch (e) {
+    console.warn('LLM scoring failed, falling back to naive:', e)
+    return mockScoreDesigners(extractedNeeds, designerSummaries)
+  }
+}
+
+async function realScoreDesigners(
+  conversationHistory: ConversationMessage[],
+  extractedNeeds: ExtractedNeeds,
+  designerSummaries: DesignerSummary[]
+): Promise<DesignerScore[]> {
+  // Build the user message: conversation context + designer list
+  const conversationText = conversationHistory
+    .map((m) => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`)
+    .join('\n')
+
+  const needsSummary = Object.entries(extractedNeeds)
+    .filter(([, v]) => v != null && (Array.isArray(v) ? v.length > 0 : true))
+    .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : v}`)
+    .join('; ')
+
+  const designerList = designerSummaries
+    .map(
+      (d) =>
+        `ID: ${d.id} | ${d.name} | ${d.specialty} | ${d.location} | €${d.hourlyRate}/hr | ${d.availability} | ${d.yearsExperience}yr exp | Tags: ${d.tags.join(', ')}\nBio: ${d.shortBio}\nApproach: ${d.approach}`
+    )
+    .join('\n\n')
+
+  const userMessage = `## User's conversation\n${conversationText}\n\n## Extracted needs\n${needsSummary || 'None extracted'}\n\n## Available designers\n${designerList}`
+
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 10000)
+
+  try {
+    const raw = await callClaude(
+      SCORE_DESIGNERS_PROMPT,
+      [{ role: 'user', content: userMessage }],
+      4096,
+      'claude-haiku-4-5-20251001',
+      controller.signal
+    )
+
+    clearTimeout(timeout)
+
+    const jsonStr = raw.replace(/^```json?\n?/, '').replace(/\n?```$/, '').trim()
+    const parsed = JSON.parse(jsonStr)
+
+    if (!Array.isArray(parsed)) throw new Error('Expected JSON array')
+
+    return parsed.map((entry: { id?: string; score?: number; reason?: string }) => ({
+      designerId: entry.id ?? '',
+      score: typeof entry.score === 'number' ? Math.max(0, Math.min(100, entry.score)) : 50,
+      reason: entry.reason ?? '',
+    }))
+  } catch (e) {
+    clearTimeout(timeout)
+    throw e
+  }
+}
+
+/**
+ * Naive fallback scoring — mirrors the old matchScore() logic from ResultsPage.
+ * Used when LLM scoring is unavailable.
+ */
+function mockScoreDesigners(
+  extractedNeeds: ExtractedNeeds,
+  designerSummaries: DesignerSummary[]
+): DesignerScore[] {
+  return designerSummaries.map((d) => {
+    let score = 40
+    const reasons: string[] = []
+
+    if (
+      extractedNeeds.constraints?.length &&
+      extractedNeeds.constraints.some((c) =>
+        c.toLowerCase().includes(d.location.toLowerCase())
+      )
+    ) {
+      score += 20
+      reasons.push(`in ${d.location}`)
+    }
+
+    if (extractedNeeds.budget && d.hourlyRate <= extractedNeeds.budget) {
+      score += 15
+      reasons.push('within budget')
+    }
+
+    if (extractedNeeds.timeline && d.availability === extractedNeeds.timeline) {
+      score += 10
+      reasons.push('available when needed')
+    }
+
+    // Add some variation based on designer id hash so scores aren't identical
+    const hash = d.id.split('').reduce((a, c) => a + c.charCodeAt(0), 0)
+    score += (hash % 11) - 5
+    score = Math.max(20, Math.min(95, score))
+
+    return {
+      designerId: d.id,
+      score,
+      reason: reasons.length > 0 ? reasons.join(', ') : 'General match',
+    }
+  })
 }
 
 // —— Real API implementation (via proxy) ——

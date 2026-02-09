@@ -108,10 +108,17 @@ export function ConversationPage() {
 
   const handleSeeMatches = async () => {
     if (!state) return
-    const fullHistory = buildFullHistory(state.initialDescription, state.messages)
-    const needs = await extractNeeds(fullHistory)
-    setComplete(needs)
-    navigate('/results')
+    setIsWaitingForLLM(true)
+    try {
+      const fullHistory = buildFullHistory(state.initialDescription, state.messages)
+      const needs = await extractNeeds(fullHistory)
+      setComplete(needs)
+      navigate('/results')
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Something went wrong')
+    } finally {
+      setIsWaitingForLLM(false)
+    }
   }
 
   if (!state) return null

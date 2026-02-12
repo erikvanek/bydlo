@@ -1,6 +1,6 @@
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { Designer } from '@/types'
@@ -16,6 +16,23 @@ const specialtyLabel: Record<Designer['specialty'], string> = {
   interior: 'Interior Design',
   architect: 'Architecture',
   both: 'Interior & Architecture',
+}
+
+/**
+ * Returns terracotta-tinted badge styles based on match score.
+ * Higher score → more saturated, prominent badge.
+ * Lower score → pale, muted badge.
+ */
+function matchBadgeStyle(score: number) {
+  // Map score 0-100 to opacity 0.08-0.25 for background, 0.4-1.0 for text
+  const t = Math.max(0, Math.min(1, (score - 30) / 60)) // normalize 30-90 → 0-1
+  const bgOpacity = 0.08 + t * 0.17
+  const textOpacity = 0.45 + t * 0.55
+  return {
+    backgroundColor: `hsl(13 52% 53% / ${bgOpacity})`,
+    color: `hsl(13 52% 40% / ${textOpacity})`,
+    borderColor: 'transparent',
+  }
 }
 
 export function DesignerCard({ designer, showMatchScore = false, isLoadingScore = false, onViewProfile }: DesignerCardProps) {
@@ -34,7 +51,10 @@ export function DesignerCard({ designer, showMatchScore = false, isLoadingScore 
                 <Skeleton className="h-5 w-20 rounded-full" />
               )}
               {showMatchScore && designer.matchScore != null && (
-                <Badge variant="secondary" className="animate-in fade-in duration-500">
+                <Badge
+                  className="animate-in fade-in duration-500 text-xs font-semibold"
+                  style={matchBadgeStyle(designer.matchScore)}
+                >
                   {designer.matchScore}% match
                 </Badge>
               )}

@@ -18,12 +18,40 @@ function buildFullHistory(
   ]
 }
 
+/** Wait at least `ms` milliseconds (used for acknowledgement pause). */
+const delay = (ms: number) => new Promise((r) => setTimeout(r, ms))
+
 export function ConversationPage() {
   const navigate = useNavigate()
   const { state, addMessage, setComplete } = useConversation()
   const [isWaitingForLLM, setIsWaitingForLLM] = useState(false)
+  const [isRedirecting, setIsRedirecting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const hasFiredRef = useRef(false)
+
+  /**
+   * Handle conversation completion:
+   * 1. Wrap-up message already shown by caller
+   * 2. Show a brief "finding matches" overlay
+   * 3. Extract needs in parallel with a minimum pause
+   * 4. Navigate to results
+   */
+  const handleCompletion = async (fullHistory: ConversationMessage[]) => {
+    setIsWaitingForLLM(false)
+    setIsRedirecting(true)
+
+    try {
+      const [needs] = await Promise.all([
+        extractNeeds(fullHistory),
+        delay(1200),
+      ])
+      setComplete(needs)
+      navigate('/results')
+    } catch (e) {
+      setIsRedirecting(false)
+      setError(e instanceof Error ? e.message : 'Something went wrong')
+    }
+  }
 
   // Send first LLM question on mount (once only)
   useEffect(() => {
@@ -32,7 +60,6 @@ export function ConversationPage() {
       return
     }
 
-    // Guard against StrictMode double-fire and re-renders
     if (state.messages.length > 0 || hasFiredRef.current) return
     hasFiredRef.current = true
 
@@ -51,13 +78,13 @@ export function ConversationPage() {
             ...history,
             { id: 'a0', role: 'assistant' as const, content: response.message, timestamp: new Date() },
           ]
-          const needs = await extractNeeds(fullHistory)
-          setComplete(needs)
+          await handleCompletion(fullHistory)
+        } else {
+          setIsWaitingForLLM(false)
         }
       } catch (e) {
         setError(e instanceof Error ? e.message : 'Something went wrong')
-        hasFiredRef.current = false // Allow retry
-      } finally {
+        hasFiredRef.current = false
         setIsWaitingForLLM(false)
       }
     }
@@ -71,7 +98,6 @@ export function ConversationPage() {
     setIsWaitingForLLM(true)
     setError(null)
 
-    // Build full history: initial description + all previous messages + this new user message
     const newUserMessage: ConversationMessage = {
       id: 'u',
       role: 'user',
@@ -95,33 +121,52 @@ export function ConversationPage() {
           ...fullHistory,
           { id: 'a', role: 'assistant' as const, content: llmResponse.message, timestamp: new Date() },
         ]
-        const needs = await extractNeeds(completeHistory)
-        setComplete(needs)
-        navigate('/results')
+        await handleCompletion(completeHistory)
+      } else {
+        setIsWaitingForLLM(false)
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Something went wrong')
-    } finally {
       setIsWaitingForLLM(false)
     }
   }
 
   const handleSeeMatches = async () => {
     if (!state) return
-    setIsWaitingForLLM(true)
+    setIsRedirecting(true)
     try {
       const fullHistory = buildFullHistory(state.initialDescription, state.messages)
-      const needs = await extractNeeds(fullHistory)
+      const [needs] = await Promise.all([
+        extractNeeds(fullHistory),
+        delay(800),
+      ])
       setComplete(needs)
       navigate('/results')
     } catch (e) {
+      setIsRedirecting(false)
       setError(e instanceof Error ? e.message : 'Something went wrong')
-    } finally {
-      setIsWaitingForLLM(false)
     }
   }
 
   if (!state) return null
+
+  // Full-page transition overlay
+  if (isRedirecting) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4 animate-in fade-in duration-300">
+          <div className="inline-flex items-center justify-center h-12 w-12 rounded-full bg-primary/10 mx-auto">
+            <svg className="h-6 w-6 text-primary animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+          </div>
+          <p className="text-lg font-medium text-foreground">Finding your matches</p>
+          <p className="text-sm text-muted-foreground">Just a moment…</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-background flex flex-col">

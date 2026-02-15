@@ -45,7 +45,7 @@ export function ConversationThread({
           <div className="flex gap-3">
             <div className="h-8 w-8 shrink-0 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-medium">B</div>
             <div className="rounded-lg border bg-muted px-4 py-3 text-sm text-muted-foreground">
-              Thinking…
+              Přemýšlím…
             </div>
           </div>
         )}
@@ -54,18 +54,18 @@ export function ConversationThread({
       <Separator />
       <div className="p-4">
         {isComplete ? (
-          <Button onClick={onSeeMatches} className="w-full">See matches</Button>
+          <Button onClick={onSeeMatches} className="w-full">Zobrazit shody</Button>
         ) : (
           <form onSubmit={handleSubmit} className="flex gap-2">
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Type your answer…"
+              placeholder="Napište odpověď…"
               disabled={isWaitingForLLM}
               className="flex-1"
             />
             <Button type="submit" disabled={!input.trim() || isWaitingForLLM}>
-              Send
+              Odeslat
             </Button>
           </form>
         )}

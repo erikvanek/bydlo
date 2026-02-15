@@ -6,8 +6,8 @@ import { FilterBar } from '@/components/FilterBar'
 import type { FilterState } from '@/types'
 
 const defaultFilters: FilterState = {
-  location: 'All locations',
-  specialty: 'All specialties',
+  location: 'Všechna města',
+  specialty: 'Všechny obory',
   rateMin: 0,
   rateMax: 200,
   availability: [],
@@ -19,9 +19,9 @@ export function BrowsePage() {
 
   const filtered = useMemo(() => {
     let list = [...designers]
-    if (filters.location !== 'All locations') list = list.filter((d) => d.location === filters.location)
-    if (filters.specialty !== 'All specialties') {
-      const spec = filters.specialty === 'Interior Design' ? 'interior' : filters.specialty === 'Architecture' ? 'architect' : 'both'
+    if (filters.location !== 'Všechna města') list = list.filter((d) => d.location === filters.location)
+    if (filters.specialty !== 'Všechny obory') {
+      const spec = filters.specialty === 'Interiérový design' ? 'interior' : filters.specialty === 'Architektura' ? 'architect' : 'both'
       list = list.filter((d) => d.specialty === spec)
     }
     if (filters.rateMax < 200) list = list.filter((d) => d.hourlyRate <= filters.rateMax)
@@ -31,12 +31,12 @@ export function BrowsePage() {
   }, [filters])
 
   const locations = useMemo(() => [...new Set(designers.map((d) => d.location))], [])
-  const specialties = useMemo(() => [...new Set(designers.map((d) => (d.specialty === 'interior' ? 'Interior Design' : d.specialty === 'architect' ? 'Architecture' : 'Both')))], [])
+  const specialties = useMemo(() => [...new Set(designers.map((d) => (d.specialty === 'interior' ? 'Interiérový design' : d.specialty === 'architect' ? 'Architektura' : 'Obojí')))], [])
 
   return (
     <div className="min-h-screen bg-background">
       <main className="max-w-5xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold mb-6">Browse designers</h1>
+        <h1 className="text-2xl font-bold mb-6">Prohlédnout designéry</h1>
         <FilterBar
           filters={filters}
           onFilterChange={setFilters}
@@ -53,7 +53,7 @@ export function BrowsePage() {
           ))}
         </div>
         {filtered.length === 0 && (
-          <p className="text-muted-foreground text-center py-12">No designers found. Try adjusting your filters.</p>
+          <p className="text-muted-foreground text-center py-12">Žádní designéři nenalezeni. Zkuste upravit filtry.</p>
         )}
       </main>
     </div>

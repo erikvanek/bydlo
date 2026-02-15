@@ -10,7 +10,7 @@ interface SituationInputProps {
 }
 
 const defaultPlaceholder =
-  "We're students moving into a 3-bedroom flat together next month. We each have some furniture but the space feels cramped and we're not sure how to make it work..."
+  "Jsme studenti, příští měsíc se stěhujeme do třípokojového bytu. Každý má nějaký nábytek, ale prostor působí stísněně a nevíme, jak to zařídit…"
 
 export function SituationInput({
   onSubmit,
@@ -29,10 +29,10 @@ export function SituationInput({
         maxLength={500}
       />
       <p className="text-sm text-muted-foreground">
-        {value.length} characters {value.length >= MIN_LENGTH ? '— ready to continue' : `(min ${MIN_LENGTH})`}
+        {value.length} znaků {value.length >= MIN_LENGTH ? '— můžete pokračovat' : `(min ${MIN_LENGTH})`}
       </p>
       <Button onClick={() => onSubmit(value.trim())} disabled={!valid}>
-        Continue
+        Pokračovat
       </Button>
     </div>
   )

@@ -15,15 +15,15 @@ import {
 import type { Designer } from '@/types'
 
 const specialtyLabel: Record<Designer['specialty'], string> = {
-  interior: 'Interior Design',
-  architect: 'Architecture',
-  both: 'Interior & Architecture',
+  interior: 'Interiérový design',
+  architect: 'Architektura',
+  both: 'Interiér a architektura',
 }
 
 const availabilityLabel: Record<Designer['availability'], string> = {
-  immediate: 'Available now',
-  'within-week': 'Available this week',
-  'within-month': 'Available this month',
+  immediate: 'K dispozici ihned',
+  'within-week': 'K dispozici tento týden',
+  'within-month': 'K dispozici tento měsíc',
 }
 
 interface DesignerProfileProps {
@@ -63,7 +63,7 @@ export function DesignerProfile({ designer, onBack }: DesignerProfileProps) {
           onClick={onBack}
           className="text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
-          &larr; Back to results
+          &larr; Zpět na výsledky
         </button>
 
         {/* Hero: avatar + key info + CTA */}
@@ -87,7 +87,7 @@ export function DesignerProfile({ designer, onBack }: DesignerProfileProps) {
                 </span>
                 <span className="text-subtle">&middot;</span>
                 <span className="text-sm text-muted-foreground">
-                  {designer.yearsExperience} years experience
+                  {designer.yearsExperience} let praxe
                 </span>
               </div>
             </div>
@@ -100,14 +100,14 @@ export function DesignerProfile({ designer, onBack }: DesignerProfileProps) {
                 </span>
               </div>
               <span className="font-semibold text-foreground">
-                &euro;{designer.hourlyRate}/hr
+                &euro;{designer.hourlyRate}/hod
               </span>
             </div>
 
             {/* Primary CTA — desktop */}
             <div className="hidden sm:block pt-1">
               <Button size="lg" onClick={handleBook} className="text-base px-8">
-                Book intro call
+                Rezervovat úvodní hovor
               </Button>
             </div>
           </div>
@@ -116,7 +116,7 @@ export function DesignerProfile({ designer, onBack }: DesignerProfileProps) {
         {/* Primary CTA — mobile (full width) */}
         <div className="sm:hidden">
           <Button size="lg" onClick={handleBook} className="w-full text-base">
-            Book intro call
+            Rezervovat úvodní hovor
           </Button>
         </div>
 
@@ -124,13 +124,13 @@ export function DesignerProfile({ designer, onBack }: DesignerProfileProps) {
 
         {/* About */}
         <section className="space-y-2">
-          <h2 className="text-lg font-bold text-foreground">About</h2>
+          <h2 className="text-lg font-bold text-foreground">O mně</h2>
           <p className="text-foreground leading-relaxed">{designer.shortBio}</p>
         </section>
 
         {/* Approach */}
         <section className="space-y-2">
-          <h2 className="text-lg font-bold text-foreground">How I work</h2>
+          <h2 className="text-lg font-bold text-foreground">Jak pracuji</h2>
           <p className="text-muted-foreground leading-relaxed">{designer.approach}</p>
         </section>
 
@@ -165,13 +165,13 @@ export function DesignerProfile({ designer, onBack }: DesignerProfileProps) {
         {/* Bottom CTA */}
         <section className="text-center py-4 space-y-3">
           <p className="text-muted-foreground">
-            Ready to get started with {designer.name.split(' ')[0]}?
+            Chceš začít spolupráci s {designer.name.split(' ')[0]}?
           </p>
           <Button size="lg" onClick={handleBook} className="text-base px-8">
-            Book a free intro call
+            Rezervovat bezplatný úvodní hovor
           </Button>
           <p className="text-xs text-subtle">
-            15 minutes &middot; no commitment &middot; free
+            15 minut &middot; nezávazně &middot; zdarma
           </p>
         </section>
       </div>
@@ -182,10 +182,10 @@ export function DesignerProfile({ designer, onBack }: DesignerProfileProps) {
           {bookingStep === 'form' ? (
             <>
               <DialogHeader>
-                <DialogTitle>Book an intro call</DialogTitle>
+                <DialogTitle>Rezervace úvodního hovoru</DialogTitle>
                 <DialogDescription>
-                  A free 15-minute call with {designer.name.split(' ')[0]} to
-                  discuss your situation and see if it's a good fit.
+                  Bezplatný 15minutový hovor s {designer.name.split(' ')[0]}, kde
+                  proberete vaši situaci a zjistíte, jestli si sednete.
                 </DialogDescription>
               </DialogHeader>
 
@@ -195,11 +195,11 @@ export function DesignerProfile({ designer, onBack }: DesignerProfileProps) {
                     htmlFor="booking-name"
                     className="text-sm font-medium text-foreground"
                   >
-                    Your name
+                    Vaše jméno
                   </label>
                   <Input
                     id="booking-name"
-                    placeholder="e.g. Jan Novak"
+                    placeholder="např. Jan Novák"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                   />
@@ -209,7 +209,7 @@ export function DesignerProfile({ designer, onBack }: DesignerProfileProps) {
                     htmlFor="booking-email"
                     className="text-sm font-medium text-foreground"
                   >
-                    Email
+                    E-mail
                   </label>
                   <Input
                     id="booking-email"
@@ -226,50 +226,50 @@ export function DesignerProfile({ designer, onBack }: DesignerProfileProps) {
                   variant="outline"
                   onClick={handleClose}
                 >
-                  Cancel
+                  Zrušit
                 </Button>
                 <Button
                   disabled={!isFormValid}
                   onClick={handleConfirm}
                 >
-                  Confirm booking
+                  Potvrdit rezervaci
                 </Button>
               </DialogFooter>
             </>
           ) : (
             <>
               <DialogHeader>
-                <DialogTitle>You're all set!</DialogTitle>
+                <DialogTitle>Máte zarezervováno!</DialogTitle>
                 <DialogDescription>
-                  This is a prototype — in the real platform,{' '}
-                  {designer.name.split(' ')[0]} would receive your request and
-                  you'd get a calendar invite. Thanks for testing!
+                  Toto je prototyp — v reálné platformě by{' '}
+                  {designer.name.split(' ')[0]} dostal/a vaši žádost a
+                  vy byste obdrželi pozvánku do kalendáře. Díky za testování!
                 </DialogDescription>
               </DialogHeader>
 
               <div className="rounded-lg bg-muted p-4 text-sm text-muted-foreground space-y-1">
                 <p>
-                  <span className="font-medium text-foreground">Call with:</span>{' '}
+                  <span className="font-medium text-foreground">Hovor s:</span>{' '}
                   {designer.name}
                 </p>
                 <p>
-                  <span className="font-medium text-foreground">Duration:</span>{' '}
-                  15 minutes
+                  <span className="font-medium text-foreground">Délka:</span>{' '}
+                  15 minut
                 </p>
                 <p>
-                  <span className="font-medium text-foreground">Cost:</span>{' '}
-                  Free
+                  <span className="font-medium text-foreground">Cena:</span>{' '}
+                  Zdarma
                 </p>
                 <p>
                   <span className="font-medium text-foreground">
-                    Confirmation sent to:
+                    Potvrzení odesláno na:
                   </span>{' '}
                   {email}
                 </p>
               </div>
 
               <DialogFooter>
-                <Button onClick={handleClose}>Done</Button>
+                <Button onClick={handleClose}>Hotovo</Button>
               </DialogFooter>
             </>
           )}

@@ -11,13 +11,13 @@ export function DesignerDetailPage() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <p className="text-muted-foreground">Designer not found.</p>
+          <p className="text-muted-foreground">Designér nenalezen.</p>
           <button
             type="button"
             onClick={() => navigate(-1)}
             className="text-foreground underline mt-2"
           >
-            Go back
+            Zpět
           </button>
         </div>
       </div>

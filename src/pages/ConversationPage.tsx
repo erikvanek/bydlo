@@ -49,7 +49,7 @@ export function ConversationPage() {
       navigate('/results')
     } catch (e) {
       setIsRedirecting(false)
-      setError(e instanceof Error ? e.message : 'Something went wrong')
+      setError(e instanceof Error ? e.message : 'Něco se pokazilo')
     }
   }
 
@@ -83,7 +83,7 @@ export function ConversationPage() {
           setIsWaitingForLLM(false)
         }
       } catch (e) {
-        setError(e instanceof Error ? e.message : 'Something went wrong')
+        setError(e instanceof Error ? e.message : 'Něco se pokazilo')
         hasFiredRef.current = false
         setIsWaitingForLLM(false)
       }
@@ -126,7 +126,7 @@ export function ConversationPage() {
         setIsWaitingForLLM(false)
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Something went wrong')
+      setError(e instanceof Error ? e.message : 'Něco se pokazilo')
       setIsWaitingForLLM(false)
     }
   }
@@ -144,7 +144,7 @@ export function ConversationPage() {
       navigate('/results')
     } catch (e) {
       setIsRedirecting(false)
-      setError(e instanceof Error ? e.message : 'Something went wrong')
+      setError(e instanceof Error ? e.message : 'Něco se pokazilo')
     }
   }
 
@@ -161,8 +161,8 @@ export function ConversationPage() {
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
             </svg>
           </div>
-          <p className="text-lg font-medium text-foreground">Finding your matches</p>
-          <p className="text-sm text-muted-foreground">Just a moment…</p>
+          <p className="text-lg font-medium text-foreground">Hledám nejlepší shody</p>
+          <p className="text-sm text-muted-foreground">Moment…</p>
         </div>
       </div>
     )
@@ -173,9 +173,9 @@ export function ConversationPage() {
       <main className="flex-1 max-w-2xl mx-auto w-full px-4 py-6">
         <Card className="flex flex-col h-[calc(100vh-6rem)]">
           <CardHeader className="shrink-0">
-            <h1 className="text-xl font-bold">A few questions</h1>
+            <h1 className="text-xl font-bold">Pár otázek</h1>
             <p className="text-sm text-muted-foreground">
-              Your situation: {state.initialDescription}
+              Vaše situace: {state.initialDescription}
             </p>
           </CardHeader>
           <CardContent className="flex-1 flex flex-col min-h-0 p-0">
@@ -187,7 +187,7 @@ export function ConversationPage() {
                   className="ml-2 underline"
                   onClick={() => setError(null)}
                 >
-                  Dismiss
+                  Zavřít
                 </button>
               </div>
             )}

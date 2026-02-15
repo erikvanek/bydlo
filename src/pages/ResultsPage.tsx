@@ -9,17 +9,17 @@ import { FilterBar } from '@/components/FilterBar'
 import type { FilterState, ConversationMessage } from '@/types'
 
 const defaultFilters: FilterState = {
-  location: 'All locations',
-  specialty: 'All specialties',
+  location: 'Všechna města',
+  specialty: 'Všechny obory',
   rateMin: 0,
   rateMax: 200,
   availability: [],
 }
 
 const specialtyLabel: Record<string, string> = {
-  interior: 'Interior Design',
-  architect: 'Architecture',
-  both: 'Interior & Architecture',
+  interior: 'Interiérový design',
+  architect: 'Architektura',
+  both: 'Interiér a architektura',
 }
 
 /** Designer summaries for the scoring prompt — built once at module level. */
@@ -94,9 +94,9 @@ export function ResultsPage() {
     if (hasScores) {
       list = list.filter((d) => d.matchScore == null || d.matchScore >= 40)
     }
-    if (filters.location !== 'All locations') list = list.filter((d) => d.location === filters.location)
-    if (filters.specialty !== 'All specialties') {
-      const spec = filters.specialty === 'Interior Design' ? 'interior' : filters.specialty === 'Architecture' ? 'architect' : 'both'
+    if (filters.location !== 'Všechna města') list = list.filter((d) => d.location === filters.location)
+    if (filters.specialty !== 'Všechny obory') {
+      const spec = filters.specialty === 'Interiérový design' ? 'interior' : filters.specialty === 'Architektura' ? 'architect' : 'both'
       list = list.filter((d) => d.specialty === spec)
     }
     if (filters.rateMax < 200) list = list.filter((d) => d.hourlyRate <= filters.rateMax)
@@ -109,19 +109,19 @@ export function ResultsPage() {
   }, [state, filters, sortBy, hasScores])
 
   const locations = useMemo(() => [...new Set(designers.map((d) => d.location))], [])
-  const specialties = useMemo(() => [...new Set(designers.map((d) => (d.specialty === 'interior' ? 'Interior Design' : d.specialty === 'architect' ? 'Architecture' : 'Both')))], [])
+  const specialties = useMemo(() => [...new Set(designers.map((d) => (d.specialty === 'interior' ? 'Interiérový design' : d.specialty === 'architect' ? 'Architektura' : 'Obojí')))], [])
 
   return (
     <div className="min-h-screen bg-background">
       <main className="max-w-5xl mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold mb-2">
           {isScoring
-            ? 'Finding your best matches...'
-            : `We found ${filteredAndScored.length} designers for you`}
+            ? 'Hledám nejlepší shody…'
+            : `Našli jsme ${filteredAndScored.length} designérů pro vás`}
         </h1>
         {state?.extractedNeeds && Object.keys(state.extractedNeeds).length > 0 && (
           <p className="text-muted-foreground text-sm mb-6">
-            Based on: {state.extractedNeeds.spaceType ?? 'your space'}, {state.extractedNeeds.budget ? `budget ~€${state.extractedNeeds.budget}` : 'budget flexible'}, {state.extractedNeeds.timeline ?? 'timeline flexible'}
+            Na základě: {state.extractedNeeds.spaceType ?? 'váš prostor'}, {state.extractedNeeds.budget ? `rozpočet ~€${state.extractedNeeds.budget}` : 'rozpočet flexibilní'}, {state.extractedNeeds.timeline === 'within-week' ? 'do týdne' : state.extractedNeeds.timeline === 'within-month' ? 'do měsíce' : 'termín flexibilní'}
           </p>
         )}
         <FilterBar
@@ -136,9 +136,9 @@ export function ResultsPage() {
             onChange={(e) => setSortBy(e.target.value as 'match' | 'rate' | 'location')}
             className="text-sm border rounded px-2 py-1"
           >
-            <option value="match">Sort by match</option>
-            <option value="rate">Sort by rate</option>
-            <option value="location">Sort by location</option>
+            <option value="match">Řadit dle shody</option>
+            <option value="rate">Řadit dle sazby</option>
+            <option value="location">Řadit dle města</option>
           </select>
         </div>
         <div className="grid gap-5 mt-6 sm:grid-cols-1 lg:grid-cols-2">
@@ -153,7 +153,7 @@ export function ResultsPage() {
           ))}
         </div>
         {filteredAndScored.length === 0 && (
-          <p className="text-muted-foreground text-center py-12">No designers found. Try adjusting your filters.</p>
+          <p className="text-muted-foreground text-center py-12">Žádní designéři nenalezeni. Zkuste upravit filtry.</p>
         )}
       </main>
     </div>

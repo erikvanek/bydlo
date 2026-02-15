@@ -208,17 +208,17 @@ function mockScoreDesigners(
       )
     ) {
       score += 20
-      reasons.push(`in ${d.location}`)
+      reasons.push(`v ${d.location}`)
     }
 
     if (extractedNeeds.budget && d.hourlyRate <= extractedNeeds.budget) {
       score += 15
-      reasons.push('within budget')
+      reasons.push('v rámci rozpočtu')
     }
 
     if (extractedNeeds.timeline && d.availability === extractedNeeds.timeline) {
       score += 10
-      reasons.push('available when needed')
+      reasons.push('dostupný/á ve správný čas')
     }
 
     // Add some variation based on designer id hash so scores aren't identical
@@ -229,7 +229,7 @@ function mockScoreDesigners(
     return {
       designerId: d.id,
       score,
-      reason: reasons.length > 0 ? reasons.join(', ') : 'General match',
+      reason: reasons.length > 0 ? reasons.join(', ') : 'Obecná shoda',
     }
   })
 }
@@ -341,45 +341,45 @@ function mockGenerateFollowUp(request: LLMRequest): LLMResponse {
   if (questionCount === 0) {
     if (text.includes('flat') || text.includes('apartment') || text.includes('byt')) {
       return {
-        message: "What's the size of your new space (roughly in m²)? And do you have a rough budget in mind for the consultation?",
+        message: "Jak velký je ten prostor (přibližně v m²)? A máš představu o rozpočtu na konzultaci?",
         shouldContinue: true,
       }
     }
-    if (text.includes('moving') || text.includes('together') || text.includes('spolu')) {
+    if (text.includes('moving') || text.includes('together') || text.includes('spolu') || text.includes('stěh')) {
       return {
-        message: "That's an exciting step! When are you planning to move? And do you have a rough budget in mind for design help?",
+        message: "OK. Kdy se plánujete stěhovat? A máš hrubou představu o rozpočtu na pomoc s designem?",
         shouldContinue: true,
       }
     }
     return {
-      message: "What's the size of your space? Do you have a rough budget in mind for the consultation?",
+      message: "Jak velký je ten prostor? A máš hrubou představu o rozpočtu na konzultaci?",
       shouldContinue: true,
     }
   }
 
   if (questionCount === 1) {
-    if (text.match(/\d+/) && (text.includes('€') || text.includes('eur') || text.includes('budget') || text.includes('korun'))) {
+    if (text.match(/\d+/) && (text.includes('€') || text.includes('eur') || text.includes('rozpočet') || text.includes('korun') || text.includes('kč'))) {
       return {
-        message: "Last question — are you mainly looking to arrange what you already have, or are you open to selling some pieces and buying new items that work better together?",
+        message: "Poslední otázka — chceš hlavně zařídit to, co už máš, nebo jsi otevřený/á i novým kusům nábytku?",
         shouldContinue: true,
       }
     }
     return {
-      message: "Do you have a rough budget in mind (e.g. in EUR)? And are you mainly looking to arrange what you have, or open to buying new pieces?",
+      message: "Máš hrubou představu o rozpočtu (třeba v EUR nebo Kč)? A chceš hlavně rozmístit stávající nábytek, nebo jsi otevřený/á i novým věcem?",
       shouldContinue: true,
     }
   }
 
   if (questionCount >= 2) {
     return {
-      message: "Great, I have enough to go on. Let me find designers who match your situation!",
+      message: "Jasně, mám dost informací. Najdu ti designéry, kteří sedí na tvou situaci!",
       shouldContinue: false,
       extractedData: {},
     }
   }
 
   return {
-    message: "Thanks — I have enough information. Let me find some designers for you.",
+    message: "Díky — mám dost informací. Najdu ti vhodné designéry.",
     shouldContinue: false,
     extractedData: {},
   }
@@ -406,15 +406,17 @@ function mockExtractNeeds(conversationHistory: ConversationMessage[]): Extracted
     needs.budget = b > a ? Math.round((a + b) / 2) : a
   }
 
-  if (allText.includes('next month') || allText.includes('příští měsíc')) needs.timeline = 'within-month'
-  else if (allText.includes('next week') || allText.includes('asap') || allText.includes('soon')) needs.timeline = 'within-week'
-  else if (allText.includes('moving') || allText.includes('stěhování')) needs.timeline = needs.timeline ?? 'within-month'
+  if (allText.includes('next month') || allText.includes('příští měsíc') || allText.includes('měsíc')) needs.timeline = 'within-month'
+  else if (allText.includes('next week') || allText.includes('příští týden') || allText.includes('asap') || allText.includes('hned') || allText.includes('ihned')) needs.timeline = 'within-week'
+  else if (allText.includes('moving') || allText.includes('stěhování') || allText.includes('stěhuj')) needs.timeline = needs.timeline ?? 'within-month'
 
-  if (allText.includes('arrange') || allText.includes('what we have') || allText.includes('keep')) {
-    needs.priorities = ['arrange existing furniture']
+  if (allText.includes('arrange') || allText.includes('what we have') || allText.includes('keep') || allText.includes('zařídit') || allText.includes('rozmístit')) {
+    needs.priorities = ['rozmístění stávajícího nábytku']
   }
-  if (allText.includes('prague') || allText.includes('praha')) needs.constraints = ['Prague']
-  if (allText.includes('brno')) needs.constraints = ['Brno']
+  if (allText.includes('prague') || allText.includes('prah') || allText.includes('praz')) needs.constraints = ['Praha']
+  if (allText.includes('brno') || allText.includes('brně') || allText.includes('brna')) needs.constraints = ['Brno']
+  if (allText.includes('olomouc') || allText.includes('olomouci')) needs.constraints = ['Olomouc']
+  if (allText.includes('ostrav')) needs.constraints = ['Ostrava']
 
   return needs
 }

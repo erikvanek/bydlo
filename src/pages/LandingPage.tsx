@@ -14,24 +14,24 @@ const MIN_LENGTH = 20
 
 const QUICK_EXAMPLES = [
   {
-    label: 'Moving in with partner',
-    text: "My partner and I are moving into a 2-bedroom flat together next month. We each have our own furniture and different style preferences, and we need help figuring out how to merge everything into one cohesive home.",
+    label: 'Stěhování s partnerem',
+    text: 'S partnerem se příští měsíc stěhujeme do dvoupokojového bytu v Praze. Každý máme svůj nábytek a jiný vkus, a potřebujeme pomoct to nějak sladit dohromady v rozpočtu do €80/hod.',
   },
   {
-    label: 'Shared flat refresh',
-    text: "We're three students sharing a flat and the common areas feel chaotic and cramped. We want to make the living room and kitchen work better for everyone without spending too much money.",
+    label: 'Refresh sdíleného bytu',
+    text: 'Jsme tři studenti v Brně a sdílíme byt, kde společné prostory vypadají chaoticky a stísněně. Chceme, aby obývák a kuchyň fungovaly líp pro všechny, aniž bychom utratili moc peněz.',
   },
   {
-    label: 'Small kitchen reno',
-    text: "We're planning a small kitchen renovation in our flat. The current layout wastes space and we need advice on how to make the most of roughly 8 square meters on a tight budget.",
+    label: 'Malá rekonstrukce kuchyně',
+    text: 'Plánujeme malou rekonstrukci kuchyně v bytě v Ostravě. Současná dispozice plýtvá prostorem a potřebujeme poradit, jak co nejlépe využít přibližně 8 metrů čtverečních s omezeným rozpočtem.',
   },
 ]
 
 const WORKFLOW_STEPS = [
-  { title: 'Describe', description: 'your situation' },
-  { title: 'Add', description: 'more details' },
-  { title: 'Match', description: 'with a designer' },
-  { title: 'Book', description: 'a consultation' },
+  { title: 'Popiš', description: 'svou situaci' },
+  { title: 'Doplň', description: 'pár detailů' },
+  { title: 'Najdi', description: 'správného designéra' },
+  { title: 'Rezervuj', description: 'si konzultaci' },
 ]
 
 const CHECKLIST_ITEMS: {
@@ -39,17 +39,17 @@ const CHECKLIST_ITEMS: {
   label: string
   hint: string
 }[] = [
-  { key: 'location', label: 'Location', hint: 'which city?' },
-  { key: 'budget', label: 'Budget', hint: 'rough budget?' },
-  { key: 'timeline', label: 'Timeline', hint: 'when do you need help?' },
-  { key: 'scope', label: 'What you need', hint: 'layout? renovation?' },
-  { key: 'style', label: 'Style preference', hint: 'optional' },
+  { key: 'location', label: 'Lokalita', hint: 'které město?' },
+  { key: 'budget', label: 'Rozpočet', hint: 'přibližná představa?' },
+  { key: 'timeline', label: 'Kdy', hint: 'kdy potřebuješ pomoct?' },
+  { key: 'scope', label: 'Co potřebuješ', hint: 'dispozice? rekonstrukce?' },
+  { key: 'style', label: 'Styl', hint: 'volitelné' },
 ]
 
 function progressLabel(count: number, total: number): string {
-  if (count === total) return 'all set!'
-  if (count <= 2) return 'good start'
-  return 'almost there'
+  if (count === total) return 'vše vyplněno!'
+  if (count <= 2) return 'dobrý začátek'
+  return 'skoro hotovo'
 }
 
 const FEATURED_IDS = ['1', '3', '7', '13']
@@ -136,7 +136,7 @@ export function LandingPage() {
             Bydlo
           </h1>
           <p className="mt-5 text-xl lg:text-2xl max-w-2xl leading-relaxed text-gradient-fade">
-            Helping you live better — one room at a time.
+            Pomáháme ti bydlet líp — pokoj po pokoji.
           </p>
         </div>
       </section>
@@ -151,15 +151,15 @@ export function LandingPage() {
           <div className="lg:col-span-8 space-y-5">
 
             <p className="text-base text-muted-foreground">
-              Describe your living situation and we'll match you with a freelance
-              designer who can help.
+              Popiš svou bytovou situaci a my ti najdeme freelance
+              designéra, který ti pomůže.
             </p>
 
             {/* Textarea with inline submit */}
             <div>
               <div className="relative">
                 <Textarea
-                  placeholder="We're moving into a shared flat next month and none of our furniture really goes together. The living room is long and narrow and we're not sure how to set it up..."
+                  placeholder="Příští měsíc se stěhujeme do sdíleného bytu a žádný z našeho nábytku k sobě moc nepasuje. Obývák je dlouhý a úzký a nevíme, jak ho zařídit..."
                   value={situationText}
                   onChange={(e) => setSituationText(e.target.value)}
                   onKeyDown={handleKeyDown}
@@ -171,7 +171,7 @@ export function LandingPage() {
                   className="absolute bottom-3 right-3 h-10 w-10 rounded-full"
                   disabled={!isValid}
                   onClick={handleSubmit}
-                  aria-label="Continue to conversation"
+                  aria-label="Pokračovat"
                 >
                   <ArrowRight className="h-5 w-5" />
                 </Button>
@@ -179,16 +179,16 @@ export function LandingPage() {
               <p className="text-xs text-muted-foreground mt-1.5">
                 {situationText.length} / 500
                 {situationText.length > 0 && situationText.length < MIN_LENGTH
-                  ? ` · min ${MIN_LENGTH} characters`
+                  ? ` · min. ${MIN_LENGTH} znaků`
                   : ''}
-                {situationText.length >= MIN_LENGTH ? ' · ready to go' : ''}
+                {situationText.length >= MIN_LENGTH ? ' · můžeš pokračovat' : ''}
               </p>
             </div>
 
             {/* Quick scenarios */}
             <div className="space-y-2">
               <p className="text-xs font-medium uppercase tracking-wider text-subtle">
-                Typical scenarios
+                Typické situace
               </p>
               <div className="flex flex-wrap gap-2">
                 {QUICK_EXAMPLES.map((ex) => (
@@ -227,7 +227,7 @@ export function LandingPage() {
                   }}
                 >
                   <p className="text-xs font-medium uppercase tracking-wider text-subtle mb-3">
-                    How it works
+                    Jak to funguje
                   </p>
                   <ol className="space-y-2.5">
                     {WORKFLOW_STEPS.map((step, i) => (
@@ -258,7 +258,7 @@ export function LandingPage() {
                   <p className={`text-xs font-medium uppercase tracking-wider mb-3 transition-colors duration-300 ${
                     allComplete ? 'text-emerald-500' : 'text-subtle'
                   }`}>
-                    Your situation
+                    Tvoje situace
                   </p>
                   <ul className="space-y-3">
                     {CHECKLIST_ITEMS.map((item) => {
@@ -305,7 +305,7 @@ export function LandingPage() {
                           ✓
                         </span>
                         <p className="text-sm font-medium text-emerald-700">
-                          Great description — you're all set!
+                          Skvělý popis — máš vše vyplněno!
                         </p>
                       </div>
                     ) : (
@@ -326,10 +326,10 @@ export function LandingPage() {
         <section className="mt-28 lg:mt-36">
           <div className="flex items-end justify-between mb-8">
             <h2 className="text-2xl lg:text-3xl font-bold tracking-tight text-foreground text-balance">
-              Meet our consultants
+              Naši konzultanti
             </h2>
             <Button variant="outline" size="sm" asChild>
-              <Link to="/browse">See all &rarr;</Link>
+              <Link to="/browse">Zobrazit vše &rarr;</Link>
             </Button>
           </div>
           <div className="grid gap-5 sm:grid-cols-1 lg:grid-cols-2">

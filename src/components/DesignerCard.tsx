@@ -13,9 +13,9 @@ interface DesignerCardProps {
 }
 
 const specialtyLabel: Record<Designer['specialty'], string> = {
-  interior: 'Interior Design',
-  architect: 'Architecture',
-  both: 'Interior & Architecture',
+  interior: 'Interiérový design',
+  architect: 'Architektura',
+  both: 'Interiér a architektura',
 }
 
 /**
@@ -55,13 +55,13 @@ export function DesignerCard({ designer, showMatchScore = false, isLoadingScore 
                   className="animate-in fade-in duration-500 text-xs font-semibold"
                   style={matchBadgeStyle(designer.matchScore)}
                 >
-                  {designer.matchScore}% match
+                  {designer.matchScore}% shoda
                 </Badge>
               )}
             </div>
             <Badge variant="outline" className="mt-1">{specialtyLabel[designer.specialty]}</Badge>
             <p className="text-sm text-muted-foreground mt-1">
-              {designer.location} · €{designer.hourlyRate}/hr · {designer.availability.replace(/-/g, ' ')}
+              {designer.location} · €{designer.hourlyRate}/hod · {designer.availability === 'immediate' ? 'ihned' : designer.availability === 'within-week' ? 'do týdne' : 'do měsíce'}
             </p>
             {isLoadingScore && !showMatchScore && (
               <Skeleton className="h-3.5 w-48 mt-1.5 rounded" />
@@ -77,7 +77,7 @@ export function DesignerCard({ designer, showMatchScore = false, isLoadingScore 
       </CardContent>
       <CardFooter className="pt-0 pb-4 px-4">
         <Button variant="outline" className="w-full" onClick={onViewProfile}>
-          View profile
+          Zobrazit profil
         </Button>
       </CardFooter>
     </Card>

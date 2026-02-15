@@ -13,7 +13,7 @@ export function ConversationMessage({ message, isLatest = false }: ConversationM
   return (
     <div className={`flex gap-3 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
       <Avatar className="h-8 w-8 shrink-0">
-        <AvatarFallback className="text-xs">{isUser ? 'You' : 'B'}</AvatarFallback>
+        <AvatarFallback className="text-xs">{isUser ? 'Vy' : 'B'}</AvatarFallback>
       </Avatar>
       <Card className={isUser ? 'bg-primary text-primary-foreground border-primary max-w-[85%]' : 'max-w-[85%]'}>
         <CardContent className="p-4">

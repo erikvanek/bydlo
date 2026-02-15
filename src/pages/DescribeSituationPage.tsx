@@ -17,9 +17,9 @@ export function DescribeSituationPage() {
       <main className="max-w-xl mx-auto px-4 py-12">
         <Card>
           <CardHeader>
-            <h1 className="text-2xl font-bold">Tell us about your situation</h1>
+            <h1 className="text-2xl font-bold">Popište svou situaci</h1>
             <p className="text-muted-foreground">
-              Write 2–5 sentences. For example: moving in with a partner, sharing a student flat, or planning a small renovation.
+              Napište 2–5 vět. Například: stěhování s partnerem, sdílený studentský byt, nebo plánování malé rekonstrukce.
             </p>
           </CardHeader>
           <CardContent>

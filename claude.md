@@ -8,8 +8,28 @@ Use this file to understand the codebase when working on it with Claude (e.g. Cl
 
 **Bydlo** is a **discovery prototype** for a designer matchmaking platform. It connects freelance designers/architects with people in transitional living situations (shared flats, couples moving in, small renovations). The app is used in the second half of discovery interviews to validate demand and get feedback on the concept.
 
-- **In scope:** Clickable UI, two user journeys, mock LLM conversation, filtering/sorting, simulated “book consultation.”
+- **In scope:** Clickable UI, two user journeys, mock LLM conversation, filtering/sorting, simulated "book consultation."
 - **Out of scope:** Auth, payments, real backend/DB, real booking, email, admin, i18n.
+
+## Research context
+
+This prototype exists to answer a specific research question and test core hypotheses about problem-solution fit. All implementation decisions should be viewed through this lens.
+
+**Research question:** How do people in life transitions (moving, renovation, moving in with partner) solve space arrangement and furnishing — and where do they encounter unmet needs that could be addressed by brief consultations from professionals (architects, interior designers, technical supervisors)?
+
+**Core hypotheses being tested:**
+- **H1 (Need exists):** People face non-trivial problems with spatial and aesthetic decisions during housing transitions — not just logistics, but "I don't know what would work" or "I care but can't solve it."
+- **H2 (Access barrier):** People who would benefit from design consultation don't seek professional help because they perceive designers as "for big projects," too expensive, or simply inaccessible for brief consultations.
+- **H3 (Informal substitutes):** People already "hire" non-professionals (friends with taste, partners, Instagram, IKEA planner, Pinterest). These substitutes partly work but leave gaps and don't bring final satisfaction.
+- **H4 (Willingness to invest):** When stakes are high enough (moving in with partner, first "own" place, already spending on furniture), people would consider paying for expert input — especially if framed as lightweight and non-committal.
+
+**How this prototype fits:** The prototype serves as a boundary object in interviews. It's shown only to participants who qualify (demonstrate design decision friction in their story). Their reaction — whether they project themselves into it, ask practical questions, or remain politely distant — provides signal strength for H1-H4.
+
+**Research materials:**
+- `specs/research/vyzkumny-plan.md` — Full research plan, hypotheses, signal criteria
+- `specs/research/scenar-klient.md` — Interview script for "demand side" (people who recently moved/renovated)
+
+When working on this codebase, consider: Does this change make the prototype more effective as a research instrument? Does it help surface the participant's mental models and needs?
 
 ## Tech stack
 
@@ -64,6 +84,8 @@ worker/
   - `specs/workflow.md` — Multi-tool AI playbook (phases, tool choice).
   - `specs/notes/wireframes.md` — ASCII wireframes.
   - `specs/HANDOFF.md` — Session handoff; update after coding sessions.
+  - `specs/research/vyzkumny-plan.md` — Research plan, hypotheses, signal criteria.
+  - `specs/research/scenar-klient.md` — Interview script for demand-side discovery.
 
 ## User journeys
 

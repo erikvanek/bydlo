@@ -133,7 +133,7 @@ export function LandingPage() {
       <section className="pt-24 pb-12 lg:pt-36 lg:pb-16">
         <div className="max-w-5xl mx-auto px-4">
           <h1 className="text-6xl lg:text-7xl font-black tracking-tight text-foreground leading-[1.05] text-balance">
-            Bydlo
+            BydloOOO
           </h1>
           <p className="mt-2.5 text-xl lg:text-2xl max-w-2xl leading-relaxed text-gradient-fade">
             Pomáháme ti bydlet líp — pokoj po pokoji.

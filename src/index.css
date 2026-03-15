@@ -62,9 +62,13 @@
   * {
     @apply border-border;
   }
-  body {
+  html, body {
     @apply text-foreground;
     background: transparent;
+  }
+  #root {
+    position: relative;
+    z-index: 1;
   }
 }
 

@@ -164,7 +164,7 @@ export function ConversationPage() {
   // Full-page transition overlay
   if (isRedirecting) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center space-y-4 animate-in fade-in duration-300">
           <div className="inline-flex items-center justify-center h-12 w-12 rounded-full bg-primary/10 mx-auto">
             <svg className="h-6 w-6 text-primary animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -180,7 +180,7 @@ export function ConversationPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen flex flex-col">
       <main className="flex-1 max-w-2xl mx-auto w-full px-4 py-6">
         <Card className="flex flex-col h-[calc(100vh-6rem)]">
           <CardHeader className="shrink-0">

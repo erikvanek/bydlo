@@ -127,7 +127,7 @@ export function LandingPage() {
   const allComplete = detectedCount === CHECKLIST_ITEMS.length
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
 
       {/* Hero */}
       <section className="pt-24 pb-12 lg:pt-36 lg:pb-16">

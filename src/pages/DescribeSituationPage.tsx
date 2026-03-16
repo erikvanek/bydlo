@@ -13,7 +13,7 @@ export function DescribeSituationPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <main className="max-w-xl mx-auto px-4 py-12">
         <Card>
           <CardHeader>

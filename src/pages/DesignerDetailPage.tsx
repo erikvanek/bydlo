@@ -9,7 +9,7 @@ export function DesignerDetailPage() {
 
   if (!designer) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <p className="text-muted-foreground">Designér nenalezen.</p>
           <button
@@ -25,7 +25,7 @@ export function DesignerDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <main className="max-w-2xl mx-auto px-4 py-8">
         <DesignerProfile
           designer={designer}

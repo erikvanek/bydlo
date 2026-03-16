@@ -47,7 +47,7 @@ export function BrowsePage() {
   const specialties = useMemo(() => [...new Set(designers.map((d) => (d.specialty === 'interior' ? 'Interiérový design' : d.specialty === 'architect' ? 'Architektura' : 'Obojí')))], [])
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <main className="max-w-5xl mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold mb-6">Prohlédnout designéry</h1>
         <FilterBar

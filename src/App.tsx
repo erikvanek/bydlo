@@ -5,10 +5,12 @@ import { ConversationPage } from '@/pages/ConversationPage'
 import { ResultsPage } from '@/pages/ResultsPage'
 import { DesignerDetailPage } from '@/pages/DesignerDetailPage'
 import { BrowsePage } from '@/pages/BrowsePage'
+import { ShaderBackground } from '@/components/ShaderBackground'
 
 function App() {
   return (
     <ConversationProvider>
+      <ShaderBackground />
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/describe" element={<Navigate to="/" replace />} />

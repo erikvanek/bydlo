@@ -5,6 +5,7 @@ import { ConversationPage } from '@/pages/ConversationPage'
 import { ResultsPage } from '@/pages/ResultsPage'
 import { DesignerDetailPage } from '@/pages/DesignerDetailPage'
 import { BrowsePage } from '@/pages/BrowsePage'
+import { PricingPage } from '@/pages/PricingPage'
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="/conversation" element={<ConversationPage />} />
         <Route path="/results" element={<ResultsPage />} />
         <Route path="/browse" element={<BrowsePage />} />
+        <Route path="/cenik" element={<PricingPage />} />
         <Route path="/designer/:id" element={<DesignerDetailPage />} />
       </Routes>
     </ConversationProvider>

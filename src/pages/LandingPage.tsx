@@ -356,6 +356,16 @@ export function LandingPage() {
           </div>
         </section>
 
+        {/* Pricing model link */}
+        <div className="mt-12 pt-8 border-t border-border">
+          <p className="text-sm text-subtle">
+            Platíš až po výsledku — výše závisí na tvé spokojenosti a hodnotě nemovitosti.{' '}
+            <Link to="/cenik" className="font-medium text-foreground underline underline-offset-2 hover:text-primary transition-colors">
+              Jak funguje cenotvorba &rarr;
+            </Link>
+          </p>
+        </div>
+
       </main>
     </div>
   )
